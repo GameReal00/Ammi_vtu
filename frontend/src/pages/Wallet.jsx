@@ -10,6 +10,7 @@ import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import api from '../api/axios';
 import { updateUser } from '../store/authSlice';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const QUICK_AMOUNTS = [500, 1000, 2000, 5000, 10000, 20000];
 
@@ -21,6 +22,8 @@ export default function Wallet() {
   const [history, setHistory]   = useState([]);
   const { register, handleSubmit, setValue, watch, reset, formState: { errors } } = useForm();
   const amount = watch('amount');
+  const location = useLocation();
+  const navigate = useNavigate();
 
   // Check if returning from Paystack
   useEffect(() => {
@@ -29,7 +32,9 @@ export default function Wallet() {
     const ref    = params.get('reference') || localStorage.getItem('paystack_ref');
 
     if (status === 'success' && ref) {
-      verifyPayment(ref);
+      verifyPayment(ref).then(() => {
+      Navigate('dashboard');
+      });
       localStorage.removeItem('paystack_ref');
     }
 
@@ -50,6 +55,7 @@ export default function Wallet() {
         toast.success(res.data.message);
         dispatch(updateUser({ wallet_balance: res.data.new_balance }));
         loadHistory();
+        return true;
       }
     } catch (err) {
       toast.error(err.response?.data?.error || 'Payment verification failed');
