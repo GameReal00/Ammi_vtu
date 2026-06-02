@@ -5,7 +5,6 @@
 
 import { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import api from '../api/axios';
@@ -17,7 +16,6 @@ const QUICK_AMOUNTS = [500, 1000, 2000, 5000, 10000, 20000];
 export default function Wallet() {
   const { user } = useSelector((s) => s.auth);
   const dispatch  = useDispatch();
-  const location  = useLocation();
   const [loading, setLoading]   = useState(false);
   const [history, setHistory]   = useState([]);
   const { register, handleSubmit, setValue, watch, reset, formState: { errors } } = useForm();
