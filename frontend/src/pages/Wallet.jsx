@@ -98,7 +98,7 @@ export default function Wallet() {
     console.log("Reference from URL:", params.get('reference')); // Log the 'reference' parameter from URL for debugging
     console.log("Reference from localStorage:", localStorage.getItem('paystack_ref')); // Log the reference stored in localStorage for debugging
 
-    const status = params.get('status');
+    const status = params.get('status') || params.get('payment'); // Check for both 'status' and 'payment' parameters
     const ref    = params.get('reference') || localStorage.getItem('paystack_ref');
     if (status === 'success' && ref) {
       verifyPaymentTemp(ref).then(() => {
