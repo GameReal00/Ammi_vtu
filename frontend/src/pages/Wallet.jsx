@@ -31,7 +31,7 @@ export default function Wallet() {
 
     if (status === 'success' && ref) {
       verifyPayment(ref).then(() => {
-      Navigate('dashboard');
+      navigate('dashboard');
       });
       localStorage.removeItem('paystack_ref');
     }
@@ -70,6 +70,24 @@ export default function Wallet() {
     } catch (err) {
       toast.error(err.response?.data?.error || 'Could not initialize payment');
       setLoading(false);
+    }
+  };
+  // Temporary log to check wallet funding increase after successful payment in console
+  const verifyPaymentTemp = async (reference) => {
+    try {
+      const res = await api.post('/wallet/fund/verify/', { reference });
+
+      console.log('VERIFY PAYMENT RESPONSE:', res.data); // Log the entire response for debugging
+
+      if (res.data.status === 'success') {
+        toast.success(res.data.message);
+        dispatch(updateUser({ wallet_balance: res.data.new_balance }));
+        loadHistory();
+        return true;
+      }
+    } catch (err) {
+      console.error('VERIFY PAYMENT ERROR:', err.response?.data || err); // Log the error response for debugging
+      toast.error(err.response?.data?.error || 'Payment verification failed');
     }
   };
 
