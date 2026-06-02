@@ -90,6 +90,22 @@ export default function Wallet() {
       toast.error(err.response?.data?.error || 'Payment verification failed');
     }
   };
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+
+    console.log("URL:", location.search); // Log the entire query string for debugging
+    console.log("Status:", params.get('status')); // Log the 'status' parameter for debugging
+    console.log("Reference from URL:", params.get('reference')); // Log the 'reference' parameter from URL for debugging
+    console.log("Reference from localStorage:", localStorage.getItem('paystack_ref')); // Log the reference stored in localStorage for debugging
+
+    const status = params.get('status');
+    const ref    = params.get('reference') || localStorage.getItem('paystack_ref');
+    if (status === 'success' && ref) {
+      verifyPaymentTemp(ref).then(() => {
+        navigate('/dashboard');
+      });
+    }
+  }, []);
 
   const fmt = (a) => `₦${Number(a || 0).toLocaleString('en-NG', { minimumFractionDigits: 2 })}`;
 
