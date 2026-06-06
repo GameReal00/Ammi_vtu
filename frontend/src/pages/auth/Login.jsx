@@ -53,7 +53,7 @@ export default function Login() {
           <div className="inline-flex items-center justify-center w-16 h-16 bg-white rounded-2xl shadow-lg mb-4">
             <span className="text-3xl">⚡</span>
           </div>
-          <h1 className="text-3xl font-bold text-white">VTU Business</h1>
+          <h1 className="text-3xl font-bold text-white">AMMI-VTU Business</h1>
           <p className="text-blue-200 mt-1">Sign in to your account</p>
         </div>
 
