@@ -1,6 +1,5 @@
 /**
- * pages/Dashboard.jsx
- * Main dashboard — shows wallet balance, quick actions, recent transactions.
+ * pages/Dashboard.jsx — Mobile-first redesign
  */
 
 import { useEffect, useState } from 'react';
@@ -10,150 +9,186 @@ import { fetchProfile } from '../store/authSlice';
 import api from '../api/axios';
 
 const quickActions = [
-  { to: '/airtime',     icon: '📞', label: 'Airtime',     color: 'bg-green-50  border-green-200 text-green-700' },
-  { to: '/data',        icon: '📶', label: 'Data',        color: 'bg-blue-50   border-blue-200 text-blue-700' },
-  { to: '/electricity', icon: '💡', label: 'Electricity', color: 'bg-yellow-50 border-yellow-200 text-yellow-700' },
-  { to: '/tv',          icon: '📺', label: 'Cable TV',    color: 'bg-purple-50 border-purple-200 text-purple-700' },
+  { to: '/airtime',     emoji: '📞', label: 'Airtime',     bg: '#EEF2FF', color: '#1B4ED8' },
+  { to: '/data',        emoji: '📶', label: 'Data',        bg: '#F0FDF4', color: '#059669' },
+  { to: '/electricity', emoji: '💡', label: 'Electricity', bg: '#FFFBEB', color: '#D97706' },
+  { to: '/tv',          emoji: '📺', label: 'Cable TV',    bg: '#FDF4FF', color: '#9333EA' },
+  { to: '/edu',         emoji: '🎓', label: 'Edu Pin',     bg: '#FFF1F2', color: '#E11D48' },
+  { to: '/wallet',      emoji: '💰', label: 'Fund Wallet', bg: '#F0F9FF', color: '#0284C7' },
 ];
-
-export default function Dashboard() {
-  const dispatch = useDispatch();
-  const { user } = useSelector((state) => state.auth);
-  const [walletData, setWalletData] = useState(null);
-  const [recentTx, setRecentTx] = useState([]);
-  const [loadingWallet, setLoadingWallet] = useState(true);
-
-  useEffect(() => {
-    // Refresh user profile on dashboard load
-    dispatch(fetchProfile());
-
-    // Load wallet balance
-    const loadWallet = async () => {
-      try {
-        const res = await api.get('/wallet/balance/');
-        setWalletData(res.data);
-      } catch (e) {
-        console.error('Wallet load error:', e);
-      } finally {
-        setLoadingWallet(false);
-      }
-    };
-
-    // Load recent wallet transactions
-    const loadHistory = async () => {
-      try {
-        const res = await api.get('/wallet/history/');
-        setRecentTx(res.data.results?.slice(0, 5) || []);
-      } catch (e) {
-        console.error('History load error:', e);
-      }
-    };
-
-    loadWallet();
-    loadHistory();
-  }, [dispatch]);
-
-  const formatCurrency = (amount) =>
-    `₦${Number(amount || 0).toLocaleString('en-NG', { minimumFractionDigits: 2 })}`;
-
-  return (
-    <div className="fade-in" style={{ padding: '24px', maxWidth: '900px' }}>
-    <div className="flex-1 p-6 space-y-6">
-
-      {/* Welcome Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">
-          Good {getGreeting()}, {user?.full_name?.split(' ')[0] || 'User'} 👋
-        </h1>
-        <p className="text-gray-500 text-sm mt-1">Here's what's happening with your account</p>
-      </div>
-
-      {/* Wallet Balance Card */}
-      <div className="bg-gradient-to-br from-blue-600 to-blue-800 rounded-3xl p-6 text-white shadow-lg">
-        <p className="text-blue-200 text-sm font-medium mb-1">Wallet Balance</p>
-        {loadingWallet ? (
-          <div className="h-10 w-40 bg-blue-500 rounded-lg animate-pulse mt-2" />
-        ) : (
-          <p className="text-4xl font-bold mt-1">
-            {formatCurrency(walletData?.balance)}
-          </p>
-        )}
-        <div className="flex items-center justify-between mt-4">
-          <p className="text-blue-200 text-xs">
-            {walletData?.is_locked ? '🔒 Wallet is locked' : '🟢 Active'}
-          </p>
-          <Link
-            to="/wallet"
-            className="bg-white text-blue-700 text-xs font-bold px-4 py-2 rounded-xl hover:bg-blue-50 transition"
-          >
-            Fund Wallet
-          </Link>
-        </div>
-      </div>
-
-      {/* Quick Actions */}
-      <div>
-        <h2 className="text-base font-semibold text-gray-700 mb-3">Quick Actions</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          {quickActions.map((action) => (
-            <Link
-              key={action.to}
-              to={action.to}
-              className={`flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border-2 transition-all hover:shadow-md hover:-translate-y-0.5 ${action.color}`}
-            >
-              <span className="text-3xl">{action.icon}</span>
-              <span className="text-sm font-semibold">{action.label}</span>
-            </Link>
-          ))}
-        </div>
-      </div>
-
-      {/* Recent Activity */}
-      <div className="card">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-base font-semibold text-gray-800">Recent Activity</h2>
-          <Link to="/history" className="text-blue-600 text-sm font-medium hover:underline">
-            View all
-          </Link>
-        </div>
-
-        {recentTx.length === 0 ? (
-          <div className="text-center py-8">
-            <p className="text-4xl mb-2">📭</p>
-            <p className="text-gray-500 text-sm">No transactions yet.</p>
-            <p className="text-gray-400 text-xs mt-1">Fund your wallet and start transacting!</p>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {recentTx.map((tx) => (
-              <div key={tx.id} className="flex items-center justify-between py-2 border-b border-gray-50 last:border-0">
-                <div className="flex items-center gap-3">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm
-                    ${tx.transaction_type === 'credit' ? 'bg-green-100' : 'bg-red-100'}`}>
-                    {tx.transaction_type === 'credit' ? '↓' : '↑'}
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-800 capitalize">{tx.source}</p>
-                    <p className="text-xs text-gray-400">{new Date(tx.created_at).toLocaleDateString()}</p>
-                  </div>
-                </div>
-                <span className={`text-sm font-bold ${tx.transaction_type === 'credit' ? 'text-green-600' : 'text-red-500'}`}>
-                  {tx.transaction_type === 'credit' ? '+' : '-'}{formatCurrency(tx.amount)}
-                </span>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
-    
-  </div>      
-  );
-}
 
 function getGreeting() {
   const h = new Date().getHours();
   if (h < 12) return 'morning';
   if (h < 17) return 'afternoon';
   return 'evening';
+}
+
+export default function Dashboard() {
+  const dispatch  = useDispatch();
+  const { user }  = useSelector((s) => s.auth);
+  const [walletData,   setWalletData]   = useState(null);
+  const [recentTx,     setRecentTx]     = useState([]);
+  const [loadingWallet, setLoadingWallet] = useState(true);
+
+  useEffect(() => {
+    dispatch(fetchProfile());
+    (async () => {
+      try {
+        const [wallet, history] = await Promise.all([
+          api.get('/wallet/balance/'),
+          api.get('/wallet/history/'),
+        ]);
+        setWalletData(wallet.data);
+        setRecentTx(history.data.results?.slice(0, 5) || []);
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setLoadingWallet(false);
+      }
+    })();
+  }, [dispatch]);
+
+  const fmt = (a) =>
+    `₦${Number(a || 0).toLocaleString('en-NG', { minimumFractionDigits: 2 })}`;
+
+  const firstName = user?.full_name?.split(' ')[0] || 'User';
+
+  return (
+    <div style={{ padding: '16px', maxWidth: '680px', margin: '0 auto' }}>
+
+      {/* ── Greeting ── */}
+      <div style={{ marginBottom: '20px' }}>
+        <h1 style={{ fontSize: '22px', fontWeight: 800, color: 'var(--gray-900)', letterSpacing: '-0.3px' }}>
+          Good {getGreeting()}, {firstName} 👋
+        </h1>
+        <p style={{ fontSize: '13px', color: 'var(--gray-400)', marginTop: '2px' }}>
+          Here's what's happening with your account
+        </p>
+      </div>
+
+      {/* ── Wallet Hero Card ── */}
+      <div className="wallet-hero" style={{ marginBottom: '20px' }}>
+        <p className="wallet-hero-label">Wallet Balance</p>
+        {loadingWallet ? (
+          <div style={{
+            height: '44px', width: '160px', borderRadius: '8px',
+            background: 'rgba(255,255,255,0.15)', marginBottom: '24px',
+            animation: 'pulse 1.5s ease-in-out infinite'
+          }} />
+        ) : (
+          <p className="wallet-hero-amount">{fmt(walletData?.balance)}</p>
+        )}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <span style={{ fontSize: '13px', opacity: 0.75, display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <span style={{
+              width: '8px', height: '8px', borderRadius: '50%',
+              background: walletData?.is_locked ? '#FCA5A5' : '#4ADE80',
+              display: 'inline-block'
+            }} />
+            {walletData?.is_locked ? 'Wallet Locked' : 'Active'}
+          </span>
+          <Link to="/wallet" className="btn btn-white btn-sm">
+            + Fund Wallet
+          </Link>
+        </div>
+      </div>
+
+      {/* ── Quick Actions ── */}
+      <div className="card" style={{ marginBottom: '16px', padding: '20px' }}>
+        <div className="card-header" style={{ marginBottom: '16px' }}>
+          <h2 className="card-title">Quick Actions</h2>
+        </div>
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(3, 1fr)',
+          gap: '10px'
+        }}>
+          {quickActions.map((a) => (
+            <Link
+              key={a.to}
+              to={a.to}
+              style={{ textDecoration: 'none' }}
+            >
+              <div style={{
+                background: a.bg,
+                borderRadius: '12px',
+                padding: '14px 10px',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '8px',
+                cursor: 'pointer',
+                transition: 'transform 0.15s ease, box-shadow 0.15s ease',
+                border: `1.5px solid ${a.bg}`,
+              }}
+              onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'}
+              onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
+              >
+                <span style={{ fontSize: '26px', lineHeight: 1 }}>{a.emoji}</span>
+                <span style={{ fontSize: '12px', fontWeight: 700, color: a.color }}>
+                  {a.label}
+                </span>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      {/* ── Recent Activity ── */}
+      <div className="card" style={{ padding: '20px' }}>
+        <div className="card-header">
+          <h2 className="card-title">Recent Activity</h2>
+          <Link to="/history" style={{
+            fontSize: '13px', fontWeight: 600,
+            color: 'var(--primary)', textDecoration: 'none'
+          }}>
+            View all →
+          </Link>
+        </div>
+
+        {recentTx.length === 0 ? (
+          <div className="empty-state">
+            <div className="empty-state-icon">📭</div>
+            <p className="empty-state-title">No transactions yet</p>
+            <p className="empty-state-text">Fund your wallet and start transacting!</p>
+          </div>
+        ) : (
+          <div className="tx-list">
+            {recentTx.map((tx) => {
+              const isCredit = tx.transaction_type === 'credit';
+              return (
+                <div key={tx.id} className="tx-item">
+                  <div className={`tx-icon ${isCredit ? 'credit' : 'debit'}`}>
+                    <span style={{ fontSize: '16px' }}>{isCredit ? '↓' : '↑'}</span>
+                  </div>
+                  <div className="tx-info">
+                    <p className="tx-desc" style={{ textTransform: 'capitalize' }}>
+                      {tx.description?.split('—')[0]?.trim() || tx.source}
+                    </p>
+                    <p className="tx-date">
+                      {new Date(tx.created_at).toLocaleDateString('en-NG', {
+                        day: 'numeric', month: 'short', year: 'numeric'
+                      })}
+                    </p>
+                  </div>
+                  <span className={`tx-amount ${isCredit ? 'credit' : 'debit'}`}>
+                    {isCredit ? '+' : '-'}{fmt(tx.amount)}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* pulse animation */}
+      <style>{`
+        @keyframes pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.4; }
+        }
+      `}</style>
+    </div>
+  );
 }
