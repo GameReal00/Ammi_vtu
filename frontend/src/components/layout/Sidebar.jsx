@@ -1,28 +1,41 @@
-import { NavLink, useNavigate } from 'react-router-dom';
-import { useSelector, useDispatch } from 'react-redux';
+/**
+ * components/layout/Sidebar.jsx
+ * Mobile-first sidebar — hidden drawer on mobile, fixed on desktop
+ */
+
+import { useState, useEffect } from 'react';
+import { NavLink, useNavigate, useLocation } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../../store/authSlice';
 
-const BASE_NAV = [
-  { to: '/dashboard',   icon: '🏠', label: 'Dashboard' },
-  { to: '/airtime',     icon: '📞', label: 'Airtime' },
-  { to: '/data',        icon: '📶', label: 'Data' },
-  { to: '/electricity', icon: '💡', label: 'Electricity' },
-  { to: '/tv',          icon: '📺', label: 'Cable TV' },
-  { to: '/edu',         icon: '🎓', label: 'Edu Pin' },
-  { to: '/wallet',      icon: '💰', label: 'Wallet' },
-  { to: '/history',     icon: '📋', label: 'History' },
-  { to: '/referral',    icon: '🎁', label: 'Refer & Earn' },
-  { to: '/profile',     icon: '👤', label: 'Profile' },
+const navItems = [
+  { to: '/dashboard',   emoji: '🏠', label: 'Dashboard' },
+  { to: '/airtime',     emoji: '📞', label: 'Airtime' },
+  { to: '/data',        emoji: '📶', label: 'Data' },
+  { to: '/electricity', emoji: '💡', label: 'Electricity' },
+  { to: '/tv',          emoji: '📺', label: 'Cable TV' },
+  { to: '/edu',         emoji: '🎓', label: 'Edu Pin' },
+  { to: '/wallet',      emoji: '💰', label: 'Wallet' },
+  { to: '/history',     emoji: '📋', label: 'History' },
+  { to: '/referral',    emoji: '🎁', label: 'Refer & Earn' },
+  { to: '/profile',     emoji: '👤', label: 'Profile' },
 ];
 
 export default function Sidebar() {
-  const { user }   = useSelector((s) => s.auth);
-  const dispatch   = useDispatch();
-  const navigate   = useNavigate();
+  const [open, setOpen]   = useState(false);
+  const dispatch          = useDispatch();
+  const navigate          = useNavigate();
+  const location          = useLocation();
+  const { user }          = useSelector((s) => s.auth);
 
-  const navItems = user?.is_staff || user?.is_superuser
-    ? [...BASE_NAV, { to: '/admin-panel', icon: '⚙️', label: 'Admin Panel' }]
-    : BASE_NAV;
+  // Close sidebar on route change (mobile)
+  useEffect(() => { setOpen(false); }, [location.pathname]);
+
+  // Prevent body scroll when sidebar open on mobile
+  useEffect(() => {
+    document.body.style.overflow = open ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [open]);
 
   const handleLogout = () => {
     dispatch(logout());
@@ -30,62 +43,208 @@ export default function Sidebar() {
   };
 
   const initials = user?.full_name
-    ?.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2) || 'U';
+    ?.split(' ').slice(0, 2).map((n) => n[0]).join('').toUpperCase() || 'U';
 
   return (
-    <aside style={{
-      width: 240, minHeight: '100vh', background: '#0A0F2E',
-      display: 'flex', flexDirection: 'column', padding: '20px 12px',
-      position: 'sticky', top: 0, flexShrink: 0,
-    }}>
-      {/* Logo */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px', marginBottom: 28 }}>
-        <div style={{ width: 36, height: 36, background: '#0047FF', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>⚡</div>
-        <span style={{ fontWeight: 800, fontSize: 15, color: 'white', letterSpacing: '-0.02em' }}>VTU Business</span>
-      </div>
+    <>
+      {/* ── Mobile Top Header ── */}
+      <header style={{
+        position: 'fixed', top: 0, left: 0, right: 0, zIndex: 200,
+        background: 'white',
+        borderBottom: '1px solid #E2E8F0',
+        height: '56px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: '0 16px',
+      }}
+      className="mobile-header"
+      >
+        {/* Hamburger */}
+        <button
+          onClick={() => setOpen(true)}
+          style={{
+            background: 'none', border: 'none', cursor: 'pointer',
+            padding: '6px', borderRadius: '8px', display: 'flex',
+            flexDirection: 'column', gap: '5px',
+          }}
+          aria-label="Open menu"
+        >
+          <span style={{ display: 'block', width: '22px', height: '2px', background: '#0F172A', borderRadius: '2px' }} />
+          <span style={{ display: 'block', width: '22px', height: '2px', background: '#0F172A', borderRadius: '2px' }} />
+          <span style={{ display: 'block', width: '16px', height: '2px', background: '#0F172A', borderRadius: '2px' }} />
+        </button>
 
-      {/* Nav */}
-      <nav style={{ display: 'flex', flexDirection: 'column', gap: 3, flex: 1 }}>
-        {navItems.map((item) => (
-          <NavLink key={item.to} to={item.to}
-            style={({ isActive }) => ({
-              display: 'flex', alignItems: 'center', gap: 10,
-              padding: '10px 13px', borderRadius: 10,
-              textDecoration: 'none', fontSize: 14, fontWeight: 500,
-              color: isActive ? 'white' : 'rgba(255,255,255,0.55)',
-              background: isActive ? '#0047FF' : 'transparent',
-              boxShadow: isActive ? '0 3px 10px rgba(0,71,255,0.4)' : 'none',
-              transition: 'all 0.15s',
-            })}>
-            <span style={{ fontSize: 16, width: 20, textAlign: 'center' }}>{item.icon}</span>
-            {item.label}
-          </NavLink>
-        ))}
+        {/* Logo */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div style={{
+            width: '30px', height: '30px', background: '#1B4ED8',
+            borderRadius: '8px', display: 'flex', alignItems: 'center',
+            justifyContent: 'center', color: 'white', fontWeight: 800, fontSize: '14px'
+          }}>A</div>
+          <span style={{ fontWeight: 800, fontSize: '16px', color: '#0F172A' }}>
+            Ahmi<span style={{ color: '#F59E0B' }}>VTU</span>
+          </span>
+        </div>
+
+        {/* Avatar */}
+        <div style={{
+          width: '34px', height: '34px', borderRadius: '50%',
+          background: '#1B4ED8', color: 'white',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: '13px', fontWeight: 700,
+        }}>
+          {initials}
+        </div>
+      </header>
+
+      {/* ── Backdrop Overlay ── */}
+      {open && (
+        <div
+          onClick={() => setOpen(false)}
+          style={{
+            position: 'fixed', inset: 0, zIndex: 299,
+            background: 'rgba(0,0,0,0.5)',
+            backdropFilter: 'blur(2px)',
+            animation: 'fadeIn 0.2s ease',
+          }}
+        />
+      )}
+
+      {/* ── Sidebar Drawer ── */}
+      <aside style={{
+        position: 'fixed', top: 0, left: 0, bottom: 0, zIndex: 300,
+        width: '260px',
+        background: '#0F172A',
+        display: 'flex', flexDirection: 'column',
+        transform: open ? 'translateX(0)' : 'translateX(-100%)',
+        transition: 'transform 0.28s cubic-bezier(0.4, 0, 0.2, 1)',
+        boxShadow: open ? '4px 0 24px rgba(0,0,0,0.25)' : 'none',
+      }}
+      className="sidebar-drawer"
+      >
+        {/* Sidebar Header */}
+        <div style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          padding: '20px 16px',
+          borderBottom: '1px solid rgba(255,255,255,0.08)',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div style={{
+              width: '34px', height: '34px', background: '#1B4ED8',
+              borderRadius: '8px', display: 'flex', alignItems: 'center',
+              justifyContent: 'center', color: 'white', fontWeight: 800, fontSize: '16px'
+            }}>A</div>
+            <span style={{ fontWeight: 800, fontSize: '17px', color: 'white' }}>
+              Ahmi<span style={{ color: '#F59E0B' }}>VTU</span>
+            </span>
+          </div>
+          {/* Close button */}
+          <button
+            onClick={() => setOpen(false)}
+            style={{
+              background: 'rgba(255,255,255,0.1)', border: 'none',
+              color: 'white', width: '32px', height: '32px',
+              borderRadius: '8px', cursor: 'pointer', fontSize: '18px',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}
+            aria-label="Close menu"
+          >×</button>
+        </div>
+
+        {/* User Info */}
+        <div style={{
+          padding: '14px 16px',
+          borderBottom: '1px solid rgba(255,255,255,0.08)',
+          display: 'flex', alignItems: 'center', gap: '10px',
+        }}>
+          <div style={{
+            width: '38px', height: '38px', borderRadius: '50%',
+            background: '#1B4ED8', color: 'white',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: '14px', fontWeight: 700, flexShrink: 0,
+          }}>{initials}</div>
+          <div style={{ minWidth: 0 }}>
+            <p style={{
+              fontSize: '13px', fontWeight: 700, color: 'white',
+              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'
+            }}>
+              {user?.full_name || 'User'}
+            </p>
+            <p style={{
+              fontSize: '11px', color: 'rgba(255,255,255,0.45)',
+              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'
+            }}>
+              {user?.email}
+            </p>
+          </div>
+        </div>
+
+        {/* Nav Links */}
+        <nav style={{ flex: 1, padding: '12px 10px', overflowY: 'auto' }}>
+          {navItems.map((item) => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              style={({ isActive }) => ({
+                display: 'flex', alignItems: 'center', gap: '12px',
+                padding: '11px 12px', borderRadius: '10px',
+                marginBottom: '2px', textDecoration: 'none',
+                fontSize: '14px', fontWeight: isActive ? 700 : 500,
+                background: isActive ? '#1B4ED8' : 'transparent',
+                color: isActive ? 'white' : 'rgba(255,255,255,0.6)',
+                transition: 'all 0.15s ease',
+              })}
+              onMouseEnter={e => {
+                if (!e.currentTarget.classList.contains('active'))
+                  e.currentTarget.style.background = 'rgba(255,255,255,0.08)';
+              }}
+              onMouseLeave={e => {
+                if (!e.currentTarget.classList.contains('active'))
+                  e.currentTarget.style.background = 'transparent';
+              }}
+            >
+              <span style={{ fontSize: '17px', lineHeight: 1 }}>{item.emoji}</span>
+              {item.label}
+            </NavLink>
+          ))}
+        </nav>
 
         {/* Logout */}
-        <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', marginTop: 8, paddingTop: 8 }}>
-          <button onClick={handleLogout} style={{
-            display: 'flex', alignItems: 'center', gap: 10,
-            width: '100%', padding: '10px 13px', borderRadius: 10,
-            background: 'rgba(255,59,92,0.1)', color: '#ff6b7a',
-            border: 'none', fontSize: 14, fontWeight: 500, cursor: 'pointer',
-          }}>
-            <span style={{ fontSize: 16, width: 20, textAlign: 'center' }}>🚪</span>
+        <div style={{
+          padding: '12px 10px',
+          borderTop: '1px solid rgba(255,255,255,0.08)'
+        }}>
+          <button
+            onClick={handleLogout}
+            style={{
+              display: 'flex', alignItems: 'center', gap: '12px',
+              width: '100%', padding: '11px 12px', borderRadius: '10px',
+              background: 'rgba(220,38,38,0.15)', border: 'none',
+              color: '#FCA5A5', fontSize: '14px', fontWeight: 600,
+              cursor: 'pointer', transition: 'background 0.15s ease',
+            }}
+            onMouseEnter={e => e.currentTarget.style.background = 'rgba(220,38,38,0.25)'}
+            onMouseLeave={e => e.currentTarget.style.background = 'rgba(220,38,38,0.15)'}
+          >
+            <span style={{ fontSize: '17px' }}>🚪</span>
             Logout
           </button>
         </div>
-      </nav>
+      </aside>
 
-      {/* User info */}
-      <div style={{ marginTop: 16, padding: 12, background: 'rgba(255,255,255,0.06)', borderRadius: 12, display: 'flex', alignItems: 'center', gap: 10 }}>
-        <div style={{ width: 34, height: 34, background: '#0047FF', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 13, color: 'white', flexShrink: 0 }}>
-          {initials}
-        </div>
-        <div style={{ overflow: 'hidden' }}>
-          <p style={{ fontSize: 13, fontWeight: 600, color: 'white', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user?.full_name || 'User'}</p>
-          <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user?.email}</p>
-        </div>
-      </div>
-    </aside>
+      <style>{`
+        @keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
+
+        /* Desktop: always show sidebar, hide mobile header */
+        @media (min-width: 768px) {
+          .mobile-header { display: none !important; }
+          .sidebar-drawer {
+            transform: translateX(0) !important;
+            box-shadow: none !important;
+          }
+        }
+      `}</style>
+    </>
   );
 }
