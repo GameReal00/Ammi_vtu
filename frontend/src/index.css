@@ -205,3 +205,18 @@ select.input-field {
   flex-direction: row;  /* ← add this */
   min-height: 100vh;
 }
+
+/* Add this to your ahmi-theme.css or index.css */
+
+/* Push content below mobile header */
+.app-main {
+  padding-top: 72px; /* 56px header + 16px gap */
+}
+
+/* On desktop, sidebar always visible — restore normal padding */
+@media (min-width: 768px) {
+  .app-main {
+    padding-top: 24px;
+    margin-left: 260px; /* sidebar width */
+  }
+}
