@@ -21,9 +21,9 @@ function ProtectedLayout() {
   const { isAuthenticated } = useSelector((state) => state.auth);
   if (!isAuthenticated) return <Navigate to="/login" replace />;
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: '#F5F7FF'}}>
+    <div style={{ display: 'flex', minHeight: '100vh', background: '#F1F5F9' }}>
       <Sidebar />
-      <main style={{flex: 1, overflow: 'auto', minWidth: 0}}>
+      <main className="app-main">
         <Outlet />
       </main>
     </div>
