@@ -136,7 +136,7 @@ export default function Sidebar() {
               justifyContent: 'center', color: 'white', fontWeight: 800, fontSize: '16px'
             }}>A</div>
             <span style={{ fontWeight: 800, fontSize: '17px', color: 'white' }}>
-              Ahmi<span style={{ color: '#F59E0B' }}>VTU</span>
+              AMMI<span style={{ color: '#F59E0B' }}>VTU</span>
             </span>
           </div>
           {/* Close button */}
