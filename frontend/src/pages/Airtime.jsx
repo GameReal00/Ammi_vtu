@@ -51,8 +51,7 @@ export default function Airtime() {
         <p className="text-gray-500 text-sm mt-1">Send airtime to any Nigerian network</p>
       </div>
 
-      {/* Wallet balance Card */}
-      {/* Wallet balance Card - SIMPLER VERSION */}
+     {/* Wallet balance Card - FIXED */}
 <div className="bg-gradient-to-r from-blue-600 to-blue-500 rounded-2xl p-4 mb-6 shadow-lg text-white flex items-center justify-between">
   <div>
     <p className="text-blue-100 text-xs font-medium uppercase tracking-wider">Wallet Balance</p>
@@ -60,11 +59,9 @@ export default function Airtime() {
       ₦{Number(user?.wallet_balance || 0).toLocaleString('en-NG', { minimumFractionDigits: 2 })}
     </p>
   </div>
-  <div className="text-4xl">💰</div> {/* Simple emoji instead of SVG */}
+  {/* Use emoji instead of SVG - much safer! */}
+  <span className="text-3xl">💰</span>
 </div>
-
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
 
           {/* Network Selection - 2x2 Grid */}
           <div>
