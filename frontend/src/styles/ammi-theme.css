@@ -949,3 +949,20 @@ h1, h2, h3, h4, h5, h6 {
 .gap-3        { gap: 12px; }
 .gap-4        { gap: 16px; }
 .w-full       { width: 100%; }
+
+
+/* Mobile: push content below fixed header */
+.app-main {
+  flex: 1;
+  min-width: 0;
+  overflow: auto;
+  padding: 72px 16px 32px;
+}
+
+/* Desktop: push content right of fixed sidebar */
+@media (min-width: 768px) {
+  .app-main {
+    margin-left: 260px;
+    padding: 28px 24px 32px;
+  }
+}
