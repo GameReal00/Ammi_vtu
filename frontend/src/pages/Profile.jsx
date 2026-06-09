@@ -1,34 +1,30 @@
 /**
- * pages/Profile.jsx
- * Edit profile, change password, upload avatar.
+ * pages/Profile.jsx — Redesigned with AhmiVTU design system
  */
-
 import { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
 import { updateUser, logout } from '../store/authSlice';
-import { useNavigate } from 'react-router-dom';
 
 export default function Profile() {
-  const { user }  = useSelector((s) => s.auth);
-  const dispatch  = useDispatch();
-  const navigate  = useNavigate();
-  const [tab, setTab]           = useState('profile');
-  const [saving, setSaving]     = useState(false);
+  const { user } = useSelector((s) => s.auth);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const [tab, setTab]                     = useState('profile');
+  const [saving, setSaving]               = useState(false);
   const [avatarPreview, setAvatarPreview] = useState(null);
 
-  const { register: regProfile, handleSubmit: submitProfile, formState: { errors: profileErrors } } = useForm({
+  const { register: regProfile, handleSubmit: submitProfile, formState: { errors: pErr } } = useForm({
     defaultValues: { full_name: user?.full_name || '', phone: user?.phone || '' }
   });
+  const { register: regPwd, handleSubmit: submitPwd, watch, reset: resetPwd, formState: { errors: wErr } } = useForm();
 
-  const { register: regPwd, handleSubmit: submitPwd, watch, reset: resetPwd, formState: { errors: pwdErrors } } = useForm();
+  const initials = user?.full_name?.split(' ').slice(0,2).map(n=>n[0]).join('').toUpperCase() || 'U';
 
-  const handleAvatarChange = (e) => {
-    const file = e.target.files[0];
-    if (file) setAvatarPreview(URL.createObjectURL(file));
-  };
+  const fmt = (a) => `₦${Number(a||0).toLocaleString('en-NG',{minimumFractionDigits:2})}`;
 
   const onUpdateProfile = async (data) => {
     setSaving(true);
@@ -38,7 +34,6 @@ export default function Profile() {
       formData.append('phone', data.phone || '');
       const fileInput = document.querySelector('#avatar-input');
       if (fileInput?.files[0]) formData.append('avatar', fileInput.files[0]);
-
       const res = await api.put('/auth/profile/update/', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
@@ -56,7 +51,7 @@ export default function Profile() {
         current_password: data.current_password,
         new_password: data.new_password,
       });
-      toast.success('Password changed! Please login again.');
+      toast.success('Password changed! Logging out...');
       resetPwd();
       setTimeout(() => { dispatch(logout()); navigate('/login'); }, 2000);
     } catch (err) {
@@ -64,107 +59,168 @@ export default function Profile() {
     } finally { setSaving(false); }
   };
 
-  const handleLogout = () => { dispatch(logout()); navigate('/login'); };
-
-  const initials = user?.full_name?.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2) || 'U';
-
   return (
-    <div className="flex-1 p-6 max-w-lg mx-auto">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">👤 Profile</h1>
-        <p className="text-gray-500 text-sm mt-1">Manage your account settings</p>
+    <div style={{ maxWidth: '500px', margin: '0 auto', padding: '4px 0 40px' }}>
+
+      {/* Page Header */}
+      <div className="page-header">
+        <h1 className="page-title">👤 Profile</h1>
+        <p className="page-subtitle">Manage your account settings</p>
       </div>
 
-      {/* Avatar */}
-      <div className="card mb-6 flex items-center gap-4">
-        <div className="relative">
+      {/* User Hero Card */}
+      <div style={{
+        background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%)',
+        borderRadius: '20px', padding: '24px', marginBottom: '20px',
+        display: 'flex', alignItems: 'center', gap: '16px',
+        position: 'relative', overflow: 'hidden',
+      }}>
+        {/* Decorative circles */}
+        <div style={{ position:'absolute', top:'-30px', right:'-30px', width:'120px', height:'120px', background:'rgba(255,255,255,0.06)', borderRadius:'50%' }} />
+        <div style={{ position:'absolute', bottom:'-40px', right:'60px', width:'160px', height:'160px', background:'rgba(255,255,255,0.04)', borderRadius:'50%' }} />
+
+        {/* Avatar */}
+        <div style={{ position: 'relative', flexShrink: 0, zIndex: 1 }}>
           {avatarPreview || user?.avatar ? (
             <img src={avatarPreview || user.avatar} alt="avatar"
-              className="w-20 h-20 rounded-full object-cover border-4 border-blue-100" />
+              style={{ width:'72px', height:'72px', borderRadius:'50%', objectFit:'cover', border:'3px solid rgba(255,255,255,0.3)' }} />
           ) : (
-            <div className="w-20 h-20 rounded-full bg-blue-600 flex items-center justify-center text-white text-2xl font-bold">
-              {initials}
-            </div>
+            <div style={{
+              width:'72px', height:'72px', borderRadius:'50%',
+              background:'rgba(255,255,255,0.2)', color:'white',
+              display:'flex', alignItems:'center', justifyContent:'center',
+              fontSize:'26px', fontWeight:800, border:'3px solid rgba(255,255,255,0.3)',
+            }}>{initials}</div>
           )}
-          <label htmlFor="avatar-input" className="absolute bottom-0 right-0 w-7 h-7 bg-blue-600 rounded-full flex items-center justify-center cursor-pointer text-white text-xs shadow">
-            ✏️
-          </label>
-          <input id="avatar-input" type="file" accept="image/*" className="hidden" onChange={handleAvatarChange} />
+          <label htmlFor="avatar-input" style={{
+            position:'absolute', bottom:0, right:0,
+            width:'24px', height:'24px', borderRadius:'50%',
+            background:'var(--accent)', display:'flex', alignItems:'center',
+            justifyContent:'center', cursor:'pointer', fontSize:'11px',
+          }}>✏️</label>
+          <input id="avatar-input" type="file" accept="image/*" style={{ display:'none' }}
+            onChange={e => { const f=e.target.files[0]; if(f) setAvatarPreview(URL.createObjectURL(f)); }} />
         </div>
-        <div>
-          <p className="font-bold text-gray-900 text-lg">{user?.full_name}</p>
-          <p className="text-gray-500 text-sm">{user?.email}</p>
-          <p className="text-blue-600 text-sm font-medium mt-1">₦{Number(user?.wallet_balance || 0).toLocaleString('en-NG', { minimumFractionDigits: 2 })}</p>
+
+        {/* User Info */}
+        <div style={{ zIndex: 1 }}>
+          <p style={{ fontSize:'18px', fontWeight:800, color:'white', lineHeight:1.2 }}>{user?.full_name}</p>
+          <p style={{ fontSize:'13px', color:'rgba(255,255,255,0.65)', marginTop:'3px' }}>{user?.email}</p>
+          <p style={{ fontSize:'15px', fontWeight:700, color:'#FCD34D', marginTop:'6px' }}>
+            {fmt(user?.wallet_balance)}
+          </p>
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="flex gap-2 mb-5">
-        {['profile', 'password'].map((t) => (
-          <button key={t} onClick={() => setTab(t)}
-            className={`px-5 py-2 rounded-xl text-sm font-medium capitalize transition-all ${
-              tab === t ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600'
-            }`}>{t === 'profile' ? '✏️ Edit Profile' : '🔒 Change Password'}</button>
+      {/* Tab Switcher */}
+      <div style={{
+        display:'flex', gap:'8px', marginBottom:'20px',
+        background:'var(--gray-100)', borderRadius:'12px', padding:'4px',
+      }}>
+        {[
+          { key:'profile',  label:'✏️ Edit Profile' },
+          { key:'password', label:'🔒 Change Password' },
+        ].map((t) => (
+          <button key={t.key} onClick={() => setTab(t.key)}
+            style={{
+              flex:1, padding:'10px 12px', borderRadius:'10px', border:'none',
+              background: tab===t.key ? 'white' : 'transparent',
+              color: tab===t.key ? 'var(--gray-900)' : 'var(--gray-500)',
+              fontSize:'13px', fontWeight:700, cursor:'pointer',
+              transition:'all 0.15s ease',
+              boxShadow: tab===t.key ? 'var(--shadow-sm)' : 'none',
+            }}>{t.label}</button>
         ))}
       </div>
 
-      {/* Profile form */}
+      {/* Profile Form */}
       {tab === 'profile' && (
-        <form onSubmit={submitProfile(onUpdateProfile)} className="card space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
-            <input className="input-field" placeholder="Your full name"
-              {...regProfile('full_name', { required: 'Name is required' })} />
-            {profileErrors.full_name && <p className="text-red-500 text-xs mt-1">{profileErrors.full_name.message}</p>}
+        <form onSubmit={submitProfile(onUpdateProfile)}>
+          <div className="card" style={{ display:'flex', flexDirection:'column', gap:'16px' }}>
+
+            <div className="form-group" style={{ marginBottom:0 }}>
+              <label className="form-label">Full Name</label>
+              <input className="form-input" placeholder="Your full name"
+                {...regProfile('full_name', { required:'Name is required' })} />
+              {pErr.full_name && <p className="form-error">{pErr.full_name.message}</p>}
+            </div>
+
+            <div className="form-group" style={{ marginBottom:0 }}>
+              <label className="form-label">Email Address</label>
+              <input className="form-input" value={user?.email} disabled
+                style={{ background:'var(--gray-50)', color:'var(--gray-400)', cursor:'not-allowed' }} />
+              <p style={{ fontSize:'11px', color:'var(--gray-400)', marginTop:'4px' }}>Email cannot be changed</p>
+            </div>
+
+            <div className="form-group" style={{ marginBottom:0 }}>
+              <label className="form-label">Phone Number</label>
+              <input className="form-input" placeholder="08012345678"
+                {...regProfile('phone')} />
+            </div>
+
+            <button type="submit" disabled={saving} className="btn btn-primary btn-full"
+              style={{ padding:'13px', fontSize:'14px', borderRadius:'12px', marginTop:'4px' }}>
+              {saving ? (
+                <span style={{ display:'flex', alignItems:'center', gap:'8px', justifyContent:'center' }}>
+                  <span className="spinner" /> Saving...
+                </span>
+              ) : 'Save Changes'}
+            </button>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
-            <input className="input-field bg-gray-50" value={user?.email} disabled />
-            <p className="text-xs text-gray-400 mt-1">Email cannot be changed</p>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
-            <input className="input-field" placeholder="08012345678"
-              {...regProfile('phone')} />
-          </div>
-          <button type="submit" disabled={saving} className="btn-primary">
-            {saving ? 'Saving...' : 'Save Changes'}
-          </button>
         </form>
       )}
 
-      {/* Password form */}
+      {/* Password Form */}
       {tab === 'password' && (
-        <form onSubmit={submitPwd(onChangePassword)} className="card space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Current Password</label>
-            <input type="password" className="input-field" placeholder="Enter current password"
-              {...regPwd('current_password', { required: 'Current password is required' })} />
-            {pwdErrors.current_password && <p className="text-red-500 text-xs mt-1">{pwdErrors.current_password.message}</p>}
+        <form onSubmit={submitPwd(onChangePassword)}>
+          <div className="card" style={{ display:'flex', flexDirection:'column', gap:'16px' }}>
+
+            {[
+              { name:'current_password', label:'Current Password', placeholder:'Enter current password', rules:{ required:'Required' } },
+              { name:'new_password',     label:'New Password',     placeholder:'Enter new password (min 6 chars)',
+                rules:{ required:'Required', minLength:{ value:6, message:'Min 6 characters' } } },
+            ].map((f) => (
+              <div key={f.name} className="form-group" style={{ marginBottom:0 }}>
+                <label className="form-label">{f.label}</label>
+                <input type="password" className="form-input" placeholder={f.placeholder}
+                  {...regPwd(f.name, f.rules)} />
+                {wErr[f.name] && <p className="form-error">{wErr[f.name].message}</p>}
+              </div>
+            ))}
+
+            <div className="form-group" style={{ marginBottom:0 }}>
+              <label className="form-label">Confirm New Password</label>
+              <input type="password" className="form-input" placeholder="Re-enter new password"
+                {...regPwd('confirm_password', {
+                  required:'Please confirm your password',
+                  validate: v => v === watch('new_password') || 'Passwords do not match',
+                })} />
+              {wErr.confirm_password && <p className="form-error">{wErr.confirm_password.message}</p>}
+            </div>
+
+            <button type="submit" disabled={saving} className="btn btn-primary btn-full"
+              style={{ padding:'13px', fontSize:'14px', borderRadius:'12px', marginTop:'4px' }}>
+              {saving ? (
+                <span style={{ display:'flex', alignItems:'center', gap:'8px', justifyContent:'center' }}>
+                  <span className="spinner" /> Changing...
+                </span>
+              ) : '🔒 Change Password'}
+            </button>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">New Password</label>
-            <input type="password" className="input-field" placeholder="Enter new password"
-              {...regPwd('new_password', { required: 'New password is required', minLength: { value: 6, message: 'Min 6 characters' } })} />
-            {pwdErrors.new_password && <p className="text-red-500 text-xs mt-1">{pwdErrors.new_password.message}</p>}
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Confirm New Password</label>
-            <input type="password" className="input-field" placeholder="Confirm new password"
-              {...regPwd('confirm_password', {
-                required: 'Please confirm password',
-                validate: (v) => v === watch('new_password') || 'Passwords do not match'
-              })} />
-            {pwdErrors.confirm_password && <p className="text-red-500 text-xs mt-1">{pwdErrors.confirm_password.message}</p>}
-          </div>
-          <button type="submit" disabled={saving} className="btn-primary">
-            {saving ? 'Changing...' : '🔒 Change Password'}
-          </button>
         </form>
       )}
 
-      {/* Logout */}
-      <button onClick={handleLogout} className="w-full mt-4 py-3 rounded-xl border-2 border-red-200 text-red-500 font-medium text-sm hover:bg-red-50 transition-all">
+      {/* Logout Button */}
+      <button onClick={() => { dispatch(logout()); navigate('/login'); }}
+        style={{
+          width:'100%', marginTop:'16px', padding:'13px',
+          borderRadius:'12px', border:'2px solid #FEE2E2',
+          background:'white', color:'var(--danger)',
+          fontSize:'14px', fontWeight:700, cursor:'pointer',
+          transition:'all 0.15s ease',
+        }}
+        onMouseEnter={e => e.currentTarget.style.background='#FEF2F2'}
+        onMouseLeave={e => e.currentTarget.style.background='white'}>
         🚪 Logout
       </button>
     </div>
