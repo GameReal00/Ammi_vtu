@@ -1,8 +1,6 @@
 /**
- * pages/auth/Register.jsx
- * New user registration form.
+ * pages/auth/Register.jsx — Redesigned with AhmiVTU design system
  */
-
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
@@ -10,23 +8,26 @@ import { useDispatch, useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
 import { registerUser, clearError } from '../../store/authSlice';
 
+const FIELDS = [
+  { name: 'full_name',     label: 'Full Name',       type: 'text',     placeholder: 'Adamu Ibrahim',
+    rules: { required: 'Full name is required', minLength: { value: 2, message: 'Name too short' } } },
+  { name: 'email',         label: 'Email Address',   type: 'email',    placeholder: 'you@example.com',
+    rules: { required: 'Email is required', pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: 'Invalid email' } } },
+  { name: 'phone_number',  label: 'Phone Number',    type: 'tel',      placeholder: '08012345678',
+    rules: { required: 'Phone number is required', pattern: { value: /^[0-9+\-\s]{7,20}$/, message: 'Enter a valid phone number' } } },
+  { name: 'password',      label: 'Password',        type: 'password', placeholder: 'At least 8 characters',
+    rules: { required: 'Password is required', minLength: { value: 8, message: 'At least 8 characters' } } },
+];
+
 export default function Register() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { isLoading, error } = useSelector((state) => state.auth);
-
-  const {
-    register,
-    handleSubmit,
-    watch,
-    formState: { errors },
-  } = useForm();
-
+  const { isLoading, error } = useSelector((s) => s.auth);
+  const { register, handleSubmit, watch, formState: { errors } } = useForm();
   const password = watch('password');
 
   useEffect(() => {
     if (error) {
-      // Show all field errors from Django
       const messages = Object.entries(error)
         .map(([field, msgs]) => `${field}: ${Array.isArray(msgs) ? msgs[0] : msgs}`)
         .join('\n');
@@ -44,105 +45,99 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-600 to-blue-900 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
+    <div style={{
+      minHeight: '100vh', display: 'flex', alignItems: 'center',
+      justifyContent: 'center', padding: '24px',
+      background: 'linear-gradient(135deg, #1B4ED8 0%, #1337A8 50%, #0F172A 100%)',
+    }}>
+      {/* Decorative background circles */}
+      <div style={{ position:'fixed', top:'-80px', right:'-80px', width:'300px', height:'300px', borderRadius:'50%', background:'rgba(255,255,255,0.04)', pointerEvents:'none' }} />
+      <div style={{ position:'fixed', bottom:'-100px', left:'-60px', width:'350px', height:'350px', borderRadius:'50%', background:'rgba(255,255,255,0.03)', pointerEvents:'none' }} />
 
-        {/* Header */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-white rounded-2xl shadow-lg mb-4">
-            <span className="text-3xl">⚡</span>
+      <div style={{ width: '100%', maxWidth: '420px', position: 'relative', zIndex: 1 }}>
+
+        {/* Logo & Heading */}
+        <div style={{ textAlign: 'center', marginBottom: '28px' }}>
+          <div style={{
+            display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+            width: '56px', height: '56px', background: 'white',
+            borderRadius: '16px', marginBottom: '14px',
+            boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
+          }}>
+            <span style={{ fontSize: '26px' }}>⚡</span>
           </div>
-          <h1 className="text-3xl font-bold text-white">VTU Business</h1>
-          <p className="text-blue-200 mt-1">Create your free account</p>
+          <h1 style={{ fontSize: '28px', fontWeight: 800, color: 'white', letterSpacing: '-0.5px' }}>
+            Ahmi<span style={{ color: '#FCD34D' }}>VTU</span>
+          </h1>
+          <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.6)', marginTop: '4px' }}>
+            Create your free account
+          </p>
         </div>
 
         {/* Form Card */}
-        <div className="bg-white rounded-3xl shadow-2xl p-8">
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <div style={{
+          background: 'white', borderRadius: '24px',
+          padding: '32px 28px',
+          boxShadow: '0 20px 60px rgba(0,0,0,0.25)',
+        }}>
 
-            {/* Full Name */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
-              <input
-                className="input-field"
-                placeholder="John Doe"
-                {...register('full_name', {
-                  required: 'Full name is required',
-                  minLength: { value: 2, message: 'Name too short' },
-                })}
-              />
-              {errors.full_name && <p className="text-red-500 text-xs mt-1">{errors.full_name.message}</p>}
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+
+              {FIELDS.map((f) => (
+                <div key={f.name} className="form-group" style={{ marginBottom: 0 }}>
+                  <label className="form-label">{f.label}</label>
+                  <input
+                    type={f.type}
+                    className="form-input"
+                    placeholder={f.placeholder}
+                    {...register(f.name, f.rules)}
+                  />
+                  {errors[f.name] && <p className="form-error">{errors[f.name].message}</p>}
+                </div>
+              ))}
+
+              {/* Confirm Password */}
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label className="form-label">Confirm Password</label>
+                <input type="password" className="form-input" placeholder="Repeat your password"
+                  {...register('confirm_password', {
+                    required: 'Please confirm your password',
+                    validate: (v) => v === password || 'Passwords do not match',
+                  })} />
+                {errors.confirm_password && <p className="form-error">{errors.confirm_password.message}</p>}
+              </div>
+
+              <button type="submit" disabled={isLoading}
+                className="btn btn-primary btn-full"
+                style={{ padding: '14px', fontSize: '15px', borderRadius: '12px', marginTop: '4px' }}>
+                {isLoading ? (
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}>
+                    <span className="spinner" /> Creating Account...
+                  </span>
+                ) : 'Create Account'}
+              </button>
             </div>
-
-            {/* Email */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
-              <input
-                type="email"
-                className="input-field"
-                placeholder="you@example.com"
-                {...register('email', {
-                  required: 'Email is required',
-                  pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: 'Invalid email' },
-                })}
-              />
-              {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>}
-            </div>
-
-            {/* Phone */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
-              <input
-                type="tel"
-                className="input-field"
-                placeholder="08012345678"
-                {...register('phone_number', {
-                  required: 'Phone number is required',
-                  pattern: { value: /^[0-9+\-\s]{7,20}$/, message: 'Enter a valid phone number' },
-                })}
-              />
-              {errors.phone_number && <p className="text-red-500 text-xs mt-1">{errors.phone_number.message}</p>}
-            </div>
-
-            {/* Password */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
-              <input
-                type="password"
-                className="input-field"
-                placeholder="At least 8 characters"
-                {...register('password', {
-                  required: 'Password is required',
-                  minLength: { value: 8, message: 'Password must be at least 8 characters' },
-                })}
-              />
-              {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>}
-            </div>
-
-            {/* Confirm Password */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Confirm Password</label>
-              <input
-                type="password"
-                className="input-field"
-                placeholder="Repeat your password"
-                {...register('confirm_password', {
-                  required: 'Please confirm your password',
-                  validate: (val) => val === password || 'Passwords do not match',
-                })}
-              />
-              {errors.confirm_password && <p className="text-red-500 text-xs mt-1">{errors.confirm_password.message}</p>}
-            </div>
-
-            <button type="submit" disabled={isLoading} className="btn-primary mt-2">
-              {isLoading ? 'Creating Account...' : 'Create Account'}
-            </button>
           </form>
 
-          <p className="text-center text-sm text-gray-500 mt-6">
+          <p style={{ textAlign: 'center', fontSize: '14px', color: 'var(--gray-500)', marginTop: '20px' }}>
             Already have an account?{' '}
-            <Link to="/login" className="text-blue-600 font-semibold hover:underline">Sign in</Link>
+            <Link to="/login" style={{ color: 'var(--primary)', fontWeight: 700, textDecoration: 'none' }}>
+              Sign in
+            </Link>
           </p>
+        </div>
+
+        {/* Trust badges */}
+        <div style={{
+          display: 'flex', justifyContent: 'center', gap: '20px',
+          marginTop: '20px',
+        }}>
+          {['🔒 Secure', '⚡ Instant', '🇳🇬 Nigerian'].map((b) => (
+            <span key={b} style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)', fontWeight: 600 }}>
+              {b}
+            </span>
+          ))}
         </div>
       </div>
     </div>
