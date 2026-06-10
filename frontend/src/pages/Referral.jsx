@@ -1,14 +1,19 @@
 /**
- * pages/Referral.jsx
- * Refer & Earn page.
+ * pages/Referral.jsx — Redesigned with AhmiVTU design system
  */
-
 import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import api from '../api/axios';
 
+const HOW_IT_WORKS = [
+  { step: '1', emoji: '🔗', text: 'Share your unique referral link with friends' },
+  { step: '2', emoji: '👤', text: 'Friend registers using your link' },
+  { step: '3', emoji: '💳', text: 'Friend funds their wallet' },
+  { step: '4', emoji: '🎉', text: 'You earn a bonus automatically!' },
+];
+
 export default function Referral() {
-  const [data, setData]     = useState(null);
+  const [data, setData]       = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -20,77 +25,157 @@ export default function Referral() {
 
   const copyLink = () => {
     navigator.clipboard.writeText(data?.referral_link || '');
-    toast.success('Referral link copied!');
+    toast.success('Referral link copied! 🎉');
+  };
+
+  const copyCode = () => {
+    navigator.clipboard.writeText(data?.referral_code || '');
+    toast.success('Code copied!');
   };
 
   if (loading) return (
-    <div className="flex-1 p-6 flex items-center justify-center">
-      <p className="text-gray-400">Loading...</p>
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '200px' }}>
+      <div style={{ textAlign: 'center', color: 'var(--gray-400)' }}>
+        <div className="spinner spinner-primary" style={{ margin: '0 auto 12px' }} />
+        <p style={{ fontSize: '14px' }}>Loading...</p>
+      </div>
     </div>
   );
 
   return (
-    <div className="flex-1 p-6 max-w-lg mx-auto">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">🎁 Refer & Earn</h1>
-        <p className="text-gray-500 text-sm mt-1">Invite friends and earn bonuses!</p>
+    <div style={{ maxWidth: '500px', margin: '0 auto', padding: '4px 0 40px' }}>
+
+      {/* Page Header */}
+      <div className="page-header">
+        <h1 className="page-title">🎁 Refer & Earn</h1>
+        <p className="page-subtitle">Invite friends and earn bonuses!</p>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 gap-4 mb-6">
-        <div className="card text-center">
-          <p className="text-3xl font-bold text-blue-600">{data?.total_referrals || 0}</p>
-          <p className="text-xs text-gray-500 mt-1">Total Referrals</p>
+      {/* Stats Cards */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '20px' }}>
+        <div style={{
+          background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%)',
+          borderRadius: '16px', padding: '20px 16px', textAlign: 'center',
+          position: 'relative', overflow: 'hidden',
+        }}>
+          <div style={{ position:'absolute', top:'-20px', right:'-20px', width:'80px', height:'80px', background:'rgba(255,255,255,0.08)', borderRadius:'50%' }} />
+          <p style={{ fontSize: '36px', fontWeight: 800, color: 'white', lineHeight: 1 }}>
+            {data?.total_referrals || 0}
+          </p>
+          <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.7)', marginTop: '6px', fontWeight: 600 }}>
+            Total Referrals
+          </p>
         </div>
-        <div className="card text-center">
-          <p className="text-2xl font-bold text-green-600">₦{Number(data?.total_bonus_earned || 0).toLocaleString()}</p>
-          <p className="text-xs text-gray-500 mt-1">Bonus Earned</p>
+        <div style={{
+          background: 'linear-gradient(135deg, var(--success) 0%, #047857 100%)',
+          borderRadius: '16px', padding: '20px 16px', textAlign: 'center',
+          position: 'relative', overflow: 'hidden',
+        }}>
+          <div style={{ position:'absolute', top:'-20px', right:'-20px', width:'80px', height:'80px', background:'rgba(255,255,255,0.08)', borderRadius:'50%' }} />
+          <p style={{ fontSize: '22px', fontWeight: 800, color: 'white', lineHeight: 1 }}>
+            ₦{Number(data?.total_bonus_earned || 0).toLocaleString()}
+          </p>
+          <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.7)', marginTop: '6px', fontWeight: 600 }}>
+            Bonus Earned
+          </p>
         </div>
       </div>
 
-      {/* Referral Code */}
-      <div className="card mb-4">
-        <p className="text-sm font-medium text-gray-600 mb-3">Your Referral Code</p>
-        <div className="bg-blue-50 border-2 border-dashed border-blue-300 rounded-xl p-4 text-center mb-4">
-          <p className="text-3xl font-bold text-blue-700 tracking-widest">{data?.referral_code}</p>
+      {/* Referral Code Card */}
+      <div className="card" style={{ marginBottom: '16px' }}>
+        <p style={{ fontSize: '13px', fontWeight: 600, color: 'var(--gray-500)', marginBottom: '12px' }}>
+          Your Referral Code
+        </p>
+        <div style={{
+          background: 'var(--primary-light)', border: '2px dashed #93C5FD',
+          borderRadius: '12px', padding: '20px', textAlign: 'center', marginBottom: '14px',
+          cursor: 'pointer',
+        }} onClick={copyCode}>
+          <p style={{
+            fontSize: '32px', fontWeight: 800, color: 'var(--primary)',
+            letterSpacing: '6px', fontFamily: 'monospace',
+          }}>
+            {data?.referral_code || '------'}
+          </p>
+          <p style={{ fontSize: '11px', color: 'var(--gray-400)', marginTop: '6px' }}>
+            Tap to copy code
+          </p>
         </div>
-        <button onClick={copyLink} className="btn-primary">
+
+        <button onClick={copyLink}
+          className="btn btn-primary btn-full"
+          style={{ padding: '13px', fontSize: '14px', borderRadius: '12px' }}>
           📋 Copy Referral Link
         </button>
+
+        {data?.referral_link && (
+          <p style={{
+            fontSize: '11px', color: 'var(--gray-400)', textAlign: 'center',
+            marginTop: '10px', wordBreak: 'break-all',
+          }}>
+            {data.referral_link}
+          </p>
+        )}
       </div>
 
-      {/* How it works */}
-      <div className="card mb-4">
-        <p className="text-sm font-semibold text-gray-700 mb-3">How it works</p>
-        <div className="space-y-3">
-          {[
-            { step: '1', text: 'Share your referral link with friends' },
-            { step: '2', text: 'Friend registers using your link' },
-            { step: '3', text: 'Friend funds their wallet' },
-            { step: '4', text: 'You earn a bonus automatically!' },
-          ].map((s) => (
-            <div key={s.step} className="flex items-center gap-3">
-              <div className="w-7 h-7 bg-blue-600 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-                {s.step}
+      {/* How It Works */}
+      <div className="card" style={{ marginBottom: '16px' }}>
+        <p style={{ fontSize: '14px', fontWeight: 700, color: 'var(--gray-800)', marginBottom: '16px' }}>
+          How it works
+        </p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          {HOW_IT_WORKS.map((s, i) => (
+            <div key={s.step} style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+              <div style={{
+                width: '36px', height: '36px', borderRadius: '50%',
+                background: 'var(--primary)', color: 'white',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: '14px', fontWeight: 800, flexShrink: 0,
+              }}>{s.step}</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1 }}>
+                <span style={{ fontSize: '20px' }}>{s.emoji}</span>
+                <p style={{ fontSize: '13px', color: 'var(--gray-600)', fontWeight: 500 }}>{s.text}</p>
               </div>
-              <p className="text-sm text-gray-600">{s.text}</p>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Referral list */}
+      {/* Referred People List */}
       {data?.referrals?.length > 0 && (
         <div className="card">
-          <p className="text-sm font-semibold text-gray-700 mb-3">People You Referred</p>
-          <div className="space-y-2">
+          <p style={{ fontSize: '14px', fontWeight: 700, color: 'var(--gray-800)', marginBottom: '14px' }}>
+            People You Referred ({data.referrals.length})
+          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {data.referrals.map((r) => (
-              <div key={r.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
-                <div>
-                  <p className="text-sm font-medium">{r.referred_name}</p>
-                  <p className="text-xs text-gray-400">{r.referred_email}</p>
+              <div key={r.id} style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                padding: '12px 14px', borderRadius: '12px', background: 'var(--gray-50)',
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div style={{
+                    width: '36px', height: '36px', borderRadius: '50%',
+                    background: 'var(--primary-light)', color: 'var(--primary)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: '14px', fontWeight: 800,
+                  }}>
+                    {r.referred_name?.[0]?.toUpperCase() || '?'}
+                  </div>
+                  <div>
+                    <p style={{ fontSize: '13px', fontWeight: 700, color: 'var(--gray-800)' }}>
+                      {r.referred_name}
+                    </p>
+                    <p style={{ fontSize: '11px', color: 'var(--gray-400)' }}>
+                      {r.referred_email}
+                    </p>
+                  </div>
                 </div>
-                <span className={`text-xs px-2 py-1 rounded-full font-medium ${r.bonus_paid ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
+                <span style={{
+                  padding: '4px 10px', borderRadius: '20px', fontSize: '12px', fontWeight: 700,
+                  background: r.bonus_paid ? 'var(--success-light)' : 'var(--gray-100)',
+                  color: r.bonus_paid ? 'var(--success)' : 'var(--gray-400)',
+                }}>
                   {r.bonus_paid ? `+₦${r.bonus_amount}` : 'Pending'}
                 </span>
               </div>
