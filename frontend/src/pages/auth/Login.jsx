@@ -1,9 +1,6 @@
 /**
- * pages/auth/Login.jsx
- * Login page with email + password form.
- * Uses React Hook Form for validation + Redux for state.
+ * pages/auth/Login.jsx — Redesigned with AhmiVTU design system
  */
-
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
@@ -14,24 +11,16 @@ import { loginUser, clearError } from '../../store/authSlice';
 export default function Login() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { isLoading, error, isAuthenticated } = useSelector((state) => state.auth);
+  const { isLoading, error, isAuthenticated } = useSelector((s) => s.auth);
+  const { register, handleSubmit, formState: { errors } } = useForm();
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm();
-
-  // Redirect to dashboard if already logged in
   useEffect(() => {
-    if (isAuthenticated) navigate('/dashboard');
+    if (isAuthenticated) navigate('/dashboard', { replace: true });
   }, [isAuthenticated, navigate]);
 
-  // Show error toast when Redux error changes
   useEffect(() => {
     if (error) {
-      const msg = error.detail || error.message || 'Login failed. Try again.';
-      toast.error(msg);
+      toast.error(typeof error === 'string' ? error : 'Invalid email or password');
       dispatch(clearError());
     }
   }, [error, dispatch]);
@@ -39,93 +28,119 @@ export default function Login() {
   const onSubmit = async (data) => {
     const result = await dispatch(loginUser(data));
     if (loginUser.fulfilled.match(result)) {
-      toast.success(`Welcome back, ${result.payload.full_name?.split(' ')[0]}!`);
+      toast.success('Welcome back! 👋');
       navigate('/dashboard');
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-600 to-blue-900 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
+    <div style={{
+      minHeight: '100vh', display: 'flex', alignItems: 'center',
+      justifyContent: 'center', padding: '24px',
+      background: 'linear-gradient(135deg, #1B4ED8 0%, #1337A8 50%, #0F172A 100%)',
+    }}>
+      {/* Decorative circles */}
+      <div style={{ position:'fixed', top:'-80px', right:'-80px', width:'300px', height:'300px', borderRadius:'50%', background:'rgba(255,255,255,0.04)', pointerEvents:'none' }} />
+      <div style={{ position:'fixed', bottom:'-100px', left:'-60px', width:'350px', height:'350px', borderRadius:'50%', background:'rgba(255,255,255,0.03)', pointerEvents:'none' }} />
 
-        {/* Logo / Brand */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-white rounded-2xl shadow-lg mb-4">
-            <span className="text-3xl">⚡</span>
+      <div style={{ width: '100%', maxWidth: '400px', position: 'relative', zIndex: 1 }}>
+
+        {/* Logo */}
+        <div style={{ textAlign: 'center', marginBottom: '28px' }}>
+          <div style={{
+            display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+            width: '56px', height: '56px', background: 'white',
+            borderRadius: '16px', marginBottom: '14px',
+            boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
+          }}>
+            <span style={{ fontSize: '26px' }}>⚡</span>
           </div>
-          <h1 className="text-3xl font-bold text-white">AMMI-VTU Business</h1>
-          <p className="text-blue-200 mt-1">Sign in to your account</p>
+          <h1 style={{ fontSize: '30px', fontWeight: 800, color: 'white', letterSpacing: '-0.5px' }}>
+            Ahmi<span style={{ color: '#FCD34D' }}>VTU</span>
+          </h1>
+          <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.6)', marginTop: '4px' }}>
+            Sign in to your account
+          </p>
         </div>
 
-        {/* Form Card */}
-        <div className="bg-white rounded-3xl shadow-2xl p-8">
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+        {/* Card */}
+        <div style={{
+          background: 'white', borderRadius: '24px',
+          padding: '32px 28px',
+          boxShadow: '0 20px 60px rgba(0,0,0,0.25)',
+        }}>
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
 
-            {/* Email */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Email Address
-              </label>
-              <input
-                type="email"
-                className="input-field"
-                placeholder="you@example.com"
-                {...register('email', {
-                  required: 'Email is required',
-                  pattern: {
-                    value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                    message: 'Enter a valid email address',
-                  },
-                })}
-              />
-              {errors.email && (
-                <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>
-              )}
+              {/* Email */}
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label className="form-label">Email Address</label>
+                <input type="email" className="form-input" placeholder="you@example.com"
+                  {...register('email', {
+                    required: 'Email is required',
+                    pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: 'Invalid email' },
+                  })} />
+                {errors.email && <p className="form-error">{errors.email.message}</p>}
+              </div>
+
+              {/* Password */}
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <label className="form-label" style={{ marginBottom: 0 }}>Password</label>
+                  <span style={{ fontSize: '12px', color: 'var(--primary)', fontWeight: 600, cursor: 'pointer' }}>
+                    Forgot password?
+                  </span>
+                </div>
+                <input type="password" className="form-input" placeholder="Enter your password"
+                  style={{ marginTop: '6px' }}
+                  {...register('password', { required: 'Password is required' })} />
+                {errors.password && <p className="form-error">{errors.password.message}</p>}
+              </div>
+
+              <button type="submit" disabled={isLoading}
+                className="btn btn-primary btn-full"
+                style={{ padding: '14px', fontSize: '15px', borderRadius: '12px', marginTop: '4px' }}>
+                {isLoading ? (
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}>
+                    <span className="spinner" /> Signing in...
+                  </span>
+                ) : 'Sign In'}
+              </button>
             </div>
-
-            {/* Password */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Password
-              </label>
-              <input
-                type="password"
-                className="input-field"
-                placeholder="Enter your password"
-                {...register('password', {
-                  required: 'Password is required',
-                  minLength: { value: 8, message: 'Password must be at least 8 characters' },
-                })}
-              />
-              {errors.password && (
-                <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>
-              )}
-            </div>
-
-            {/* Submit */}
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="btn-primary mt-2"
-            >
-              {isLoading ? (
-                <span className="flex items-center justify-center gap-2">
-                  <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
-                  </svg>
-                  Signing in...
-                </span>
-              ) : 'Sign In'}
-            </button>
           </form>
 
-          <p className="text-center text-sm text-gray-500 mt-6">
-            Don't have an account?{' '}
-            <Link to="/register" className="text-blue-600 font-semibold hover:underline">
-              Create one
-            </Link>
-          </p>
+          {/* Divider */}
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: '12px',
+            margin: '20px 0', color: 'var(--gray-300)',
+          }}>
+            <div style={{ flex: 1, height: '1px', background: 'var(--gray-200)' }} />
+            <span style={{ fontSize: '12px', color: 'var(--gray-400)' }}>New here?</span>
+            <div style={{ flex: 1, height: '1px', background: 'var(--gray-200)' }} />
+          </div>
+
+          <Link to="/register" style={{ textDecoration: 'none' }}>
+            <button style={{
+              width: '100%', padding: '13px', borderRadius: '12px',
+              border: '2px solid var(--primary)', background: 'white',
+              color: 'var(--primary)', fontSize: '14px', fontWeight: 700,
+              cursor: 'pointer', transition: 'all 0.15s ease',
+            }}
+            onMouseEnter={e => e.currentTarget.style.background = 'var(--primary-light)'}
+            onMouseLeave={e => e.currentTarget.style.background = 'white'}
+            >
+              Create Free Account
+            </button>
+          </Link>
+        </div>
+
+        {/* Trust badges */}
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', marginTop: '20px' }}>
+          {['🔒 Secure', '⚡ Instant', '🇳🇬 Nigerian'].map((b) => (
+            <span key={b} style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)', fontWeight: 600 }}>
+              {b}
+            </span>
+          ))}
         </div>
       </div>
     </div>
