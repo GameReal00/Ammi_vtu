@@ -67,7 +67,7 @@ export default function Register() {
             <span style={{ fontSize: '26px' }}>⚡</span>
           </div>
           <h1 style={{ fontSize: '28px', fontWeight: 800, color: 'white', letterSpacing: '-0.5px' }}>
-            Ahmi<span style={{ color: '#FCD34D' }}>VTU</span>
+            Ammi<span style={{ color: '#FCD34D' }}>VTU</span>
           </h1>
           <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.6)', marginTop: '4px' }}>
             Create your free account
