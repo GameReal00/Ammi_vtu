@@ -1,41 +1,34 @@
 /**
- * pages/Wallet.jsx
- * Wallet funding via Paystack.
+ * pages/Wallet.jsx — Redesigned + cleaned up (removed duplicate useEffect/debug logs)
  */
-
 import { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
+import { useLocation, useNavigate } from 'react-router-dom';
 import api from '../api/axios';
 import { updateUser } from '../store/authSlice';
-import { useLocation, useNavigate } from 'react-router-dom';
 
 const QUICK_AMOUNTS = [500, 1000, 2000, 5000, 10000, 20000];
 
 export default function Wallet() {
-  const { user } = useSelector((s) => s.auth);
+  const { user }  = useSelector((s) => s.auth);
   const dispatch  = useDispatch();
-  const [loading, setLoading]   = useState(false);
-  const [history, setHistory]   = useState([]);
+  const location  = useLocation();
+  const navigate  = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [history, setHistory] = useState([]);
   const { register, handleSubmit, setValue, watch, reset, formState: { errors } } = useForm();
   const amount = watch('amount');
-  const location = useLocation();
-  const navigate = useNavigate();
 
-  // Check if returning from Paystack
   useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const status = params.get('status');
-    const ref    = params.get('reference') || localStorage.getItem('paystack_ref');
-
+    const params  = new URLSearchParams(location.search);
+    const status  = params.get('status');
+    const ref     = params.get('reference') || localStorage.getItem('paystack_ref');
     if (status === 'success' && ref) {
-      verifyPayment(ref).then(() => {
-      navigate('dashboard');
-      });
       localStorage.removeItem('paystack_ref');
+      verifyPayment(ref);
     }
-
     loadHistory();
   }, []);
 
@@ -53,7 +46,7 @@ export default function Wallet() {
         toast.success(res.data.message);
         dispatch(updateUser({ wallet_balance: res.data.new_balance }));
         loadHistory();
-        return true;
+        setTimeout(() => navigate('/dashboard'), 2000);
       }
     } catch (err) {
       toast.error(err.response?.data?.error || 'Payment verification failed');
@@ -65,128 +58,132 @@ export default function Wallet() {
     try {
       const res = await api.post('/wallet/fund/initialize/', { amount: data.amount });
       localStorage.setItem('paystack_ref', res.data.reference);
-      // Redirect to Paystack payment page
       window.location.href = res.data.authorization_url;
     } catch (err) {
       toast.error(err.response?.data?.error || 'Could not initialize payment');
       setLoading(false);
     }
   };
-  // Temporary log to check wallet funding increase after successful payment in console
-  const verifyPaymentTemp = async (reference) => {
-    try {
-      const res = await api.post('/wallet/fund/verify/', { reference });
-
-      console.log('VERIFY PAYMENT RESPONSE:', res.data); // Log the entire response for debugging
-
-      if (res.data.status === 'success') {
-        toast.success(res.data.message);
-        dispatch(updateUser({ wallet_balance: res.data.new_balance }));
-        loadHistory();
-        return true;
-      }
-    } catch (err) {
-      console.error('VERIFY PAYMENT ERROR:', err.response?.data || err); // Log the error response for debugging
-      toast.error(err.response?.data?.error || 'Payment verification failed');
-    }
-  };
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-
-    console.log("URL:", location.search); // Log the entire query string for debugging
-    console.log("Status:", params.get('status')); // Log the 'status' parameter for debugging
-    console.log("Reference from URL:", params.get('reference')); // Log the 'reference' parameter from URL for debugging
-    console.log("Reference from localStorage:", localStorage.getItem('paystack_ref')); // Log the reference stored in localStorage for debugging
-
-    const status = params.get('status') || params.get('payment'); // Check for both 'status' and 'payment' parameters
-    const ref    = params.get('reference') || localStorage.getItem('paystack_ref');
-    if (status === 'success' && ref) {
-      verifyPaymentTemp(ref).then(() => {
-        navigate('/dashboard');
-      });
-    }
-  }, []);
 
   const fmt = (a) => `₦${Number(a || 0).toLocaleString('en-NG', { minimumFractionDigits: 2 })}`;
 
   return (
-    <div className="flex-1 p-6 max-w-lg mx-auto">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">💰 My Wallet</h1>
-        <p className="text-gray-500 text-sm mt-1">Fund your wallet to make purchases</p>
+    <div style={{ maxWidth: '500px', margin: '0 auto', padding: '4px 0 40px' }}>
+
+      {/* Page Header */}
+      <div className="page-header">
+        <h1 className="page-title">💰 My Wallet</h1>
+        <p className="page-subtitle">Fund your wallet to make purchases</p>
       </div>
 
-      {/* Balance card */}
-      <div className="bg-gradient-to-br from-blue-600 to-blue-800 rounded-2xl p-6 text-white mb-6 shadow-lg">
-        <p className="text-blue-200 text-sm font-medium mb-1">Available Balance</p>
-        <p className="text-4xl font-bold">{fmt(user?.wallet_balance)}</p>
-        <div className="flex items-center gap-2 mt-3">
-          <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-          <span className="text-blue-200 text-sm">Active</span>
+      {/* Wallet Hero Card */}
+      <div className="wallet-hero" style={{ marginBottom: '20px' }}>
+        <p className="wallet-hero-label">Available Balance</p>
+        <p className="wallet-hero-amount">{fmt(user?.wallet_balance)}</p>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#4ADE80', display: 'inline-block' }} />
+          <span style={{ fontSize: '13px', opacity: 0.75 }}>Active & Ready</span>
         </div>
       </div>
 
-      {/* Fund wallet form */}
-      <div className="card mb-6">
-        <h2 className="text-lg font-bold text-gray-800 mb-4">Fund Wallet</h2>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Select Amount</label>
-            <div className="grid grid-cols-3 gap-2 mb-3">
+      {/* Fund Wallet Form */}
+      <div className="card" style={{ marginBottom: '16px' }}>
+        <h2 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--gray-900)', marginBottom: '16px' }}>
+          ➕ Fund Wallet
+        </h2>
+
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <div style={{ marginBottom: '16px' }}>
+            <label className="form-label">Select Amount</label>
+            <div style={{
+              display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)',
+              gap: '8px', margin: '8px 0',
+            }}>
               {QUICK_AMOUNTS.map((a) => (
-                <button key={a} type="button" onClick={() => setValue('amount', a)}
-                  className={`py-2 rounded-xl text-sm font-medium border transition-all ${
-                    Number(amount) === a ? 'bg-blue-600 text-white border-blue-600' : 'bg-gray-50 text-gray-700 border-gray-200'
-                  }`}>
+                <button key={a} type="button"
+                  onClick={() => setValue('amount', a, { shouldValidate: true })}
+                  style={{
+                    padding: '10px 8px', borderRadius: '10px',
+                    border: `2px solid ${Number(amount) === a ? 'var(--primary)' : 'var(--gray-200)'}`,
+                    background: Number(amount) === a ? 'var(--primary)' : 'white',
+                    color: Number(amount) === a ? 'white' : 'var(--gray-700)',
+                    fontSize: '13px', fontWeight: 700,
+                    cursor: 'pointer', transition: 'all 0.15s ease',
+                  }}>
                   ₦{a.toLocaleString()}
                 </button>
               ))}
             </div>
-            <input type="number" className="input-field" placeholder="Or enter custom amount"
+            <input type="number" className="form-input"
+              placeholder="Or enter custom amount (min ₦100)"
+              style={{ marginTop: '8px' }}
               {...register('amount', {
                 required: 'Amount is required',
                 min: { value: 100, message: 'Minimum is ₦100' },
                 max: { value: 1000000, message: 'Maximum is ₦1,000,000' },
               })} />
-            {errors.amount && <p className="text-red-500 text-xs mt-1">{errors.amount.message}</p>}
+            {errors.amount && <p className="form-error">{errors.amount.message}</p>}
           </div>
 
-          <button type="submit" disabled={loading} className="btn-primary">
-            {loading ? 'Redirecting to Paystack...' : `Fund Wallet${amount ? ` — ₦${Number(amount).toLocaleString()}` : ''}`}
+          <button type="submit" disabled={loading} className="btn btn-primary btn-full"
+            style={{ padding: '14px', fontSize: '15px', borderRadius: '12px' }}>
+            {loading ? (
+              <span style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}>
+                <span className="spinner" /> Redirecting to Paystack...
+              </span>
+            ) : `Fund Wallet${amount ? ` — ₦${Number(amount).toLocaleString()}` : ''}`}
           </button>
         </form>
 
-        <div className="mt-4 flex items-center justify-center gap-2 text-xs text-gray-400">
-          <span>🔒 Secured by</span>
-          <span className="font-bold text-green-600">Paystack</span>
+        {/* Secured badge */}
+        <div style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          gap: '6px', marginTop: '14px',
+        }}>
+          <span style={{ fontSize: '13px', color: 'var(--gray-400)' }}>🔒 Secured by</span>
+          <span style={{ fontSize: '13px', fontWeight: 800, color: '#059669' }}>Paystack</span>
         </div>
       </div>
 
-      {/* Transaction history */}
+      {/* Wallet Transaction History */}
       <div className="card">
-        <h2 className="text-lg font-bold text-gray-800 mb-4">Wallet History</h2>
+        <h2 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--gray-900)', marginBottom: '16px' }}>
+          📄 Wallet History
+        </h2>
+
         {history.length === 0 ? (
-          <p className="text-center text-gray-400 py-6">No transactions yet</p>
+          <div className="empty-state">
+            <div className="empty-state-icon">📭</div>
+            <p className="empty-state-title">No transactions yet</p>
+            <p className="empty-state-text">Fund your wallet to get started!</p>
+          </div>
         ) : (
-          <div className="space-y-3">
-            {history.slice(0, 10).map((tx) => (
-              <div key={tx.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
-                <div className="flex items-center gap-3">
-                  <div className={`w-9 h-9 rounded-full flex items-center justify-center text-lg ${
-                    tx.transaction_type === 'credit' ? 'bg-green-100' : 'bg-red-100'
-                  }`}>
-                    {tx.transaction_type === 'credit' ? '⬆️' : '⬇️'}
+          <div className="tx-list">
+            {history.slice(0, 10).map((tx) => {
+              const isCredit = tx.transaction_type === 'credit';
+              return (
+                <div key={tx.id} className="tx-item">
+                  <div className={`tx-icon ${isCredit ? 'credit' : 'debit'}`}>
+                    <span style={{ fontSize: '16px' }}>{isCredit ? '↓' : '↑'}</span>
                   </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-800">{tx.description || tx.source}</p>
-                    <p className="text-xs text-gray-400">{new Date(tx.created_at).toLocaleDateString('en-NG')}</p>
+                  <div className="tx-info">
+                    <p className="tx-desc">
+                      {tx.description?.length > 40
+                        ? tx.description.slice(0, 40) + '...'
+                        : tx.description || tx.source}
+                    </p>
+                    <p className="tx-date">
+                      {new Date(tx.created_at).toLocaleDateString('en-NG', {
+                        day: 'numeric', month: 'short', year: 'numeric'
+                      })}
+                    </p>
                   </div>
+                  <span className={`tx-amount ${isCredit ? 'credit' : 'debit'}`}>
+                    {isCredit ? '+' : '-'}{fmt(tx.amount)}
+                  </span>
                 </div>
-                <p className={`text-sm font-bold ${tx.transaction_type === 'credit' ? 'text-green-600' : 'text-red-500'}`}>
-                  {tx.transaction_type === 'credit' ? '+' : '-'}{fmt(tx.amount)}
-                </p>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
