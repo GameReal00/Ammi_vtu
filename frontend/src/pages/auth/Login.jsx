@@ -1,12 +1,14 @@
 /**
  * pages/auth/Login.jsx — Redesigned with AhmiVTU design system
  */
+
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
 import { loginUser, clearError } from '../../store/authSlice';
+import { Link } from 'react-router-dom';
 
 export default function Login() {
   const dispatch = useDispatch();
@@ -87,9 +89,10 @@ export default function Login() {
               <div className="form-group" style={{ marginBottom: 0 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <label className="form-label" style={{ marginBottom: 0 }}>Password</label>
-                  <span style={{ fontSize: '12px', color: 'var(--primary)', fontWeight: 600, cursor: 'pointer' }}>
-                    Forgot password?
-                  </span>
+                  // Replace the span with:
+                  <Link to="/forgot-password" style={{ fontSize:'12px', color:'var(--primary)', fontWeight:600, textDecoration:'none' }}>
+  Forgot password?
+</Link>
                 </div>
                 <input type="password" className="form-input" placeholder="Enter your password"
                   style={{ marginTop: '6px' }}
