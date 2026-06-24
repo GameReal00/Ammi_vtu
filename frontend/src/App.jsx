@@ -1,3 +1,5 @@
+import ForgotPassword from './pages/auth/ForgotPassword';
+import ResetPassword  from './pages/auth/ResetPassword';
 import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { Toaster } from 'react-hot-toast';
@@ -53,6 +55,8 @@ export default function App() {
         </Route>
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password"  element={<ResetPassword />} />
     </BrowserRouter>
   );
 }
