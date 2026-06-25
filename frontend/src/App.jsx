@@ -1,5 +1,3 @@
-import ForgotPassword from './pages/auth/ForgotPassword';
-import ResetPassword  from './pages/auth/ResetPassword';
 import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { Toaster } from 'react-hot-toast';
@@ -7,6 +5,8 @@ import { Toaster } from 'react-hot-toast';
 import Sidebar from './components/layout/Sidebar';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
+import ForgotPassword from './pages/auth/ForgotPassword';
+import ResetPassword  from './pages/auth/ResetPassword';
 import Dashboard from './pages/Dashboard';
 import Airtime from './pages/Airtime';
 import Data from './pages/Data';
@@ -15,9 +15,8 @@ import TV from './pages/TV';
 import EduPin from './pages/EduPin';
 import History from './pages/History';
 import Referral from './pages/Referral';
-import Wallet  from './pages/Wallet';
+import Wallet from './pages/Wallet';
 import Profile from './pages/Profile';
-
 
 function ProtectedLayout() {
   const { isAuthenticated } = useSelector((state) => state.auth);
@@ -37,9 +36,14 @@ export default function App() {
     <BrowserRouter>
       <Toaster position="top-right" toastOptions={{ duration: 4000, style: { borderRadius: '12px', fontSize: '14px' } }} />
       <Routes>
-        <Route path="/login"    element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/"         element={<Navigate to="/dashboard" replace />} />
+        {/* Public routes */}
+        <Route path="/login"            element={<Login />} />
+        <Route path="/register"         element={<Register />} />
+        <Route path="/forgot-password"  element={<ForgotPassword />} />
+        <Route path="/reset-password"   element={<ResetPassword />} />
+        <Route path="/"                 element={<Navigate to="/dashboard" replace />} />
+
+        {/* Protected routes */}
         <Route element={<ProtectedLayout />}>
           <Route path="/dashboard"   element={<Dashboard />} />
           <Route path="/airtime"     element={<Airtime />} />
@@ -49,14 +53,12 @@ export default function App() {
           <Route path="/edu"         element={<EduPin />} />
           <Route path="/history"     element={<History />} />
           <Route path="/referral"    element={<Referral />} />
-          <Route path="/wallet"  element={<Wallet />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/profile"     element={<Navigate to="/dashboard" replace />} />
+          <Route path="/wallet"      element={<Wallet />} />
+          <Route path="/profile"     element={<Profile />} />
         </Route>
+
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/reset-password"  element={<ResetPassword />} />
     </BrowserRouter>
   );
 }
