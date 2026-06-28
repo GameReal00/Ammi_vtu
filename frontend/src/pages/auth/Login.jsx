@@ -8,7 +8,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
 import { loginUser, clearError } from '../../store/authSlice';
-import { Link } from 'react-router-dom';
 
 export default function Login() {
   const dispatch = useDispatch();
