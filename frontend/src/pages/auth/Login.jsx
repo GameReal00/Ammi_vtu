@@ -88,7 +88,7 @@ export default function Login() {
               <div className="form-group" style={{ marginBottom: 0 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <label className="form-label" style={{ marginBottom: 0 }}>Password</label>
-                  // Replace the span with:
+                  
                   <Link to="/forgot-password" style={{ fontSize:'12px', color:'var(--primary)', fontWeight:600, textDecoration:'none' }}>
   Forgot password?
 </Link>
