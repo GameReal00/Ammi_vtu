@@ -1,8 +1,13 @@
-import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useState } from 'react';
+import { BrowserRouter, Routes, Route, Navigate, Outlet, useNavigate } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
 import { Toaster } from 'react-hot-toast';
 
 import Sidebar from './components/layout/Sidebar';
+import IdleWarningModal from './components/IdleWarningModal';
+import useIdleTimeout from './hooks/useIdleTimeout';
+import { logout } from './store/authSlice';
+
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 import ForgotPassword from './pages/auth/ForgotPassword';
@@ -18,15 +23,46 @@ import Referral from './pages/Referral';
 import Wallet from './pages/Wallet';
 import Profile from './pages/Profile';
 
+// How long a user can be inactive before being auto-logged-out (security feature)
+const IDLE_TIMEOUT_MS   = 15 * 60 * 1000; // 15 minutes
+const IDLE_WARNING_MS   = 60 * 1000;      // warn 60 seconds before logging out
+
 function ProtectedLayout() {
   const { isAuthenticated } = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const [showIdleWarning, setShowIdleWarning] = useState(false);
+
+  const handleIdleLogout = () => {
+    setShowIdleWarning(false);
+    dispatch(logout());
+    navigate('/login');
+  };
+
+  const { resetNow } = useIdleTimeout({
+    idleTime: IDLE_TIMEOUT_MS,
+    warningTime: IDLE_WARNING_MS,
+    onWarning: () => setShowIdleWarning(true),
+    onIdle: handleIdleLogout,
+    enabled: isAuthenticated,
+  });
+
   if (!isAuthenticated) return <Navigate to="/login" replace />;
+
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: '#F1F5F9' }}>
       <Sidebar />
       <main className="app-main">
         <Outlet />
       </main>
+
+      {showIdleWarning && (
+        <IdleWarningModal
+          secondsLeft={IDLE_WARNING_MS / 1000}
+          onStay={() => { setShowIdleWarning(false); resetNow(); }}
+          onLogout={handleIdleLogout}
+        />
+      )}
     </div>
   );
 }
@@ -34,7 +70,33 @@ function ProtectedLayout() {
 export default function App() {
   return (
     <BrowserRouter>
-      <Toaster position="top-right" toastOptions={{ duration: 4000, style: { borderRadius: '12px', fontSize: '14px' } }} />
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          duration: 4000,
+          style: {
+            background: '#fff',
+            color: '#0F172A',
+            borderRadius: '14px',
+            padding: '14px 16px',
+            fontSize: '14px',
+            fontWeight: 600,
+            boxShadow: '0 10px 30px rgba(0,0,0,0.12)',
+            border: '1px solid #E2E8F0',
+          },
+          success: {
+            iconTheme: { primary: '#10B981', secondary: '#fff' },
+            style: { background: '#F0FDF4', border: '1px solid #A7F3D0', color: '#065F46' },
+          },
+          error: {
+            iconTheme: { primary: '#EF4444', secondary: '#fff' },
+            style: { background: '#FEF2F2', border: '1px solid #FECACA', color: '#991B1B' },
+          },
+          loading: {
+            iconTheme: { primary: '#1B4ED8', secondary: '#fff' },
+          },
+        }}
+      />
       <Routes>
         {/* Public routes */}
         <Route path="/login"            element={<Login />} />
