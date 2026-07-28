@@ -23,9 +23,15 @@ import Referral from './pages/Referral';
 import Wallet from './pages/Wallet';
 import Profile from './pages/Profile';
 
-// How long a user can be inactive before being auto-logged-out (security feature)
-const IDLE_TIMEOUT_MS   = 15 * 60 * 1000; // 15 minutes
-const IDLE_WARNING_MS   = 60 * 1000;      // warn 60 seconds before logging out
+// Admin panel (Phase 4)
+import AdminLayout from './components/admin/AdminLayout';
+import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminUsers from './pages/admin/AdminUsers';
+import AdminTransactions from './pages/admin/AdminTransactions';
+import AdminPricing from './pages/admin/AdminPricing';
+
+const IDLE_TIMEOUT_MS = 15 * 60 * 1000;
+const IDLE_WARNING_MS = 60 * 1000;
 
 function ProtectedLayout() {
   const { isAuthenticated } = useSelector((state) => state.auth);
@@ -105,7 +111,7 @@ export default function App() {
         <Route path="/reset-password"   element={<ResetPassword />} />
         <Route path="/"                 element={<Navigate to="/dashboard" replace />} />
 
-        {/* Protected routes */}
+        {/* Protected customer routes */}
         <Route element={<ProtectedLayout />}>
           <Route path="/dashboard"   element={<Dashboard />} />
           <Route path="/airtime"     element={<Airtime />} />
@@ -117,6 +123,15 @@ export default function App() {
           <Route path="/referral"    element={<Referral />} />
           <Route path="/wallet"      element={<Wallet />} />
           <Route path="/profile"     element={<Profile />} />
+        </Route>
+
+        {/* Admin panel routes - staff only, guarded inside AdminLayout */}
+        <Route path="/admin-panel" element={<AdminLayout />}>
+          <Route index                element={<Navigate to="/admin-panel/dashboard" replace />} />
+          <Route path="dashboard"     element={<AdminDashboard />} />
+          <Route path="users"         element={<AdminUsers />} />
+          <Route path="transactions" element={<AdminTransactions />} />
+          <Route path="pricing"       element={<AdminPricing />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
