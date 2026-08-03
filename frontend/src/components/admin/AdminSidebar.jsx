@@ -15,7 +15,7 @@ export default function AdminSidebar() {
       display: 'flex', flexDirection: 'column', gap: '4px', zIndex: 10,
     }}>
       <div style={{ padding: '0 12px 24px', color: 'white', fontWeight: 800, fontSize: '18px' }}>
-        AhmiVTU <span style={{ color: 'var(--primary)' }}>Admin</span>
+        AmmiVTU <span style={{ color: 'var(--primary)' }}>Admin</span>
       </div>
 
       {NAV_ITEMS.map((item) => (
