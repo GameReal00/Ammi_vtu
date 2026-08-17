@@ -46,12 +46,11 @@ export default function AdminDashboard() {
   useEffect(() => {
     setLoading(true);
     Promise.all([loadStats(), loadDaily(days)]).finally(() => setLoading(false));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     if (!loading) loadDaily(days);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
   }, [days]);
 
   if (loading) {
@@ -137,3 +136,4 @@ export default function AdminDashboard() {
     </div>
   );
 }
+

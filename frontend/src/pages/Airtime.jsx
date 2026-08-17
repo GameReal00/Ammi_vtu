@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import api from '../api/axios';
+import usePinConfirm from '../hooks/usePinConfirm';
 
 const NETWORKS = [
   { id: 'mtn',      label: 'MTN',     bg: '#FEF9C3', color: '#854D0E', dot: '#EAB308' },
@@ -19,15 +20,21 @@ export default function Airtime() {
   const [loading, setLoading] = useState(false);
   const { register, handleSubmit, setValue, watch, reset, formState: { errors } } = useForm();
   const amount = watch('amount');
+  const { requestPin, pinModal } = usePinConfirm();
 
   const onSubmit = async (data) => {
     if (!selectedNetwork) return toast.error('Please select a network');
+    requestPin(async (pin) => purchaseAirtime(data, pin));
+  };
+
+  const purchaseAirtime = async (data, pin) => {
     setLoading(true);
     try {
       const res = await api.post('/services/airtime/', {
         network: selectedNetwork,
         phone: data.phone,
         amount: data.amount,
+        pin: pin,
       });
       toast.success(res.data.message);
       reset();
@@ -147,6 +154,7 @@ export default function Airtime() {
 
         </div>
       </form>
+      {pinModal}
     </div>
   );
 }

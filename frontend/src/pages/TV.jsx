@@ -6,6 +6,7 @@ import { useSelector } from 'react-redux';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import api from '../api/axios';
+import usePinConfirm from '../hooks/usePinConfirm';
 
 const PROVIDERS = [
   { id: 'dstv',      label: 'DSTV',      emoji: '📡', bg: '#EFF6FF', color: '#1D4ED8', dot: '#3B82F6' },
@@ -23,6 +24,7 @@ export default function TV() {
   const [verified, setVerified]         = useState(null);
   const [loading, setLoading]           = useState(false);
   const { register, handleSubmit, watch, reset, formState: { errors } } = useForm();
+  const { requestPin, pinModal } = usePinConfirm();
 
   useEffect(() => {
     if (!selectedProvider) return;
@@ -66,6 +68,9 @@ export default function TV() {
 
   const onSubmit = async (data) => {
     if (!selectedBouquet) return toast.error('Please select a bouquet');
+    requestPin(async (pin) => purchaseTV(data, pin));
+  };
+  const purchaseTV = async (data, pin) => {
     setLoading(true);
     try {
       const res = await api.post('/services/tv/', {
@@ -74,6 +79,7 @@ export default function TV() {
         variation_code: selectedBouquet.variation_code,
         amount: selectedBouquet.variation_amount,
         phone: data.phone,
+        pin,
       });
       toast.success(res.data.message);
       reset();
@@ -283,6 +289,8 @@ export default function TV() {
       <style>{`
         @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
       `}</style>
+      {pinModal}
     </div>
   );
 }
+

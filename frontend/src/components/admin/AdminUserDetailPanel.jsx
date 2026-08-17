@@ -31,7 +31,7 @@ export default function AdminUserDetailPanel({ userId, onBack }) {
 
   useEffect(() => {
     loadUser();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
   }, [userId]);
 
   const handleToggleStatus = async () => {

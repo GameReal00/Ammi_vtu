@@ -6,6 +6,7 @@ import { useSelector } from 'react-redux';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import api from '../api/axios';
+import usePinConfirm from '../hooks/usePinConfirm';
 
 const EXAMS = [
   { id: 'waec',              label: 'WAEC',         emoji: '📘', desc: 'Result Checker',   bg: '#EFF6FF', color: '#1D4ED8', dot: '#3B82F6' },
@@ -23,6 +24,7 @@ export default function EduPin() {
   const [loadingVars, setLoadingVars]   = useState(false);
   const [result, setResult]             = useState(null);
   const { register, handleSubmit, reset, formState: { errors } } = useForm();
+  const { requestPin, pinModal } = usePinConfirm();
 
   useEffect(() => {
     if (!selectedExam) return;
@@ -43,6 +45,9 @@ export default function EduPin() {
 
   const onSubmit = async (data) => {
     if (!selectedVar) return toast.error('Please select a plan');
+    requestPin(async (pin) => purchaseEduPin(data, pin));
+  };
+  const purchaseEduPin = async (data, pin) => {
     setLoading(true);
     setResult(null);
     try {
@@ -51,6 +56,7 @@ export default function EduPin() {
         variation_code: selectedVar.variation_code,
         amount: selectedVar.variation_amount,
         phone: data.phone,
+        pin,
       });
       toast.success(res.data.message);
       setResult(res.data.pin_data);
@@ -250,6 +256,7 @@ export default function EduPin() {
       <style>{`
         @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
       `}</style>
+      {pinModal}
     </div>
   );
 }

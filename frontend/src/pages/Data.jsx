@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import api from '../api/axios';
+import usePinConfirm from '../hooks/usePinConfirm';
 
 const NETWORKS = [
   { id: 'mtn',      label: 'MTN',     bg: '#FEF9C3', color: '#854D0E', dot: '#EAB308' },
@@ -19,6 +20,7 @@ export default function Data() {
   const [loadingPlans, setLoadingPlans] = useState(false);
   const [loading, setLoading]         = useState(false);
   const { register, handleSubmit, reset, formState: { errors } } = useForm();
+  const {requestPin, pinModal} = usePinConfirm();
 
   useEffect(() => {
     if (!selectedNetwork) return;
@@ -40,6 +42,9 @@ export default function Data() {
   const onSubmit = async (data) => {
     if (!selectedNetwork) return toast.error('Please select a network');
     if (!selectedPlan)    return toast.error('Please select a data plan');
+    requestPin (async (pin) => purchaseData(data, pin));
+  };
+  const purchaseData = async (data, pin) => {
     setLoading(true);
     try {
       const res = await api.post('/services/data/', {
@@ -48,6 +53,7 @@ export default function Data() {
         variation_code: selectedPlan.variation_code,
         amount: selectedPlan.variation_amount,
         plan_name: selectedPlan.name,
+        pin,
       });
       toast.success(res.data.message);
       reset();
@@ -231,6 +237,7 @@ export default function Data() {
       <style>{`
         @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
       `}</style>
+      {pinModal}
     </div>
   );
 }

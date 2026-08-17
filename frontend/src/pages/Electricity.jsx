@@ -6,6 +6,7 @@ import { useSelector } from 'react-redux';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import api from '../api/axios';
+import usePinConfirm from '../hooks/usePinConfirm';
 
 const PROVIDERS = [
   { id: 'ikeja-electric',  label: 'Ikeja Electric' },
@@ -31,6 +32,7 @@ export default function Electricity() {
   const [loading, setLoading]     = useState(false);
   const { register, handleSubmit, setValue, watch, reset, formState: { errors } } = useForm();
   const amount = watch('amount');
+  const { requestPin, pinModal } = usePinConfirm();
 
   const handleVerify = async () => {
     const serviceId   = watch('service_id');
@@ -58,6 +60,10 @@ export default function Electricity() {
   };
 
   const onSubmit = async (data) => {
+    register('meter_type', { value: meterType });
+    requestPin(async (pin) => purchaseElectricity(data, pin));
+  };
+  const purchaseElectricity = async (data, pin) => {
     setLoading(true);
     try {
       const res = await api.post('/services/electricity/', {
@@ -66,6 +72,7 @@ export default function Electricity() {
         variation_code: meterType,
         amount: data.amount,
         phone: data.phone,
+        pin,
       });
       toast.success(res.data.message);
       if (res.data.token) toast.success(`Token: ${res.data.token}`, { duration: 10000 });
@@ -224,6 +231,7 @@ export default function Electricity() {
 
         </div>
       </form>
+      {pinModal}
     </div>
   );
 }
