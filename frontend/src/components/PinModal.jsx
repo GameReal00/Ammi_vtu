@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import api from '../api/axios';
+import { useNavigate } from 'react-router-dom';
 
 export default function PinModal({ open, onClose, onSuccess }) {
   const [pin, setPin] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   if (!open) return null;
 
@@ -39,11 +41,26 @@ export default function PinModal({ open, onClose, onSuccess }) {
           placeholder="****"
           style={{ width: '100%', marginTop: 16, padding: '12px 16px', textAlign: 'center', fontSize: 24, letterSpacing: 8, border: '1px solid #e5e7eb', borderRadius: 12, backgroundColor: '#f9fafb', outline: 'none', boxSizing: 'border-box' }}
         />
-        {error && <p style={{ color: '#dc2626', fontSize: 14, marginTop: 8 }}>{error}</p>}
-        <div style={{ display: 'flex', gap: 12, marginTop: 20 }}>
-          <button type="button" onClick={onClose} style={{ flex: 1, padding: 12, borderRadius: 12, border: '1px solid #e5e7eb', backgroundColor: '#ffffff', fontWeight: 600, cursor: 'pointer' }}>Cancel</button>
-          <button type="submit" disabled={loading || pin.length < 4} style={{ flex: 1, padding: 12, borderRadius: 12, border: 'none', backgroundColor: '#2563eb', color: '#ffffff', fontWeight: 600, cursor: 'pointer', opacity: loading || pin.length < 4 ? 0.5 : 1 }}>
-            {loading ? 'Checking...' : 'Confirm'}
+        {error && 
+<p style={{ color: '#dc2626', fontSize: 14, marginTop: 8 }}>
+  {error}
+  {error.toLowerCase().includes('not set') && (
+    <button
+      type="button"
+      onClick={() => {onClose(); navigate('/set-pin');}}
+      style={{display: 'block', marginTop: 6, fontSize: 14, color: '#2563eb', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer', fontweight: 600, padding: 0}}
+      >
+          Set your PIN now
+        </button>
+  )}
+</p>}
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 24 }}>  
+          <button
+            type="button"
+            onClick={onClose}
+            style={{ fontSize: 14, color: '#2563eb', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer', fontweight: 600, padding: 0 }}
+          >
+            Close
           </button>
         </div>
       </form>

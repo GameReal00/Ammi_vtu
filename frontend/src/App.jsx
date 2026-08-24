@@ -22,6 +22,7 @@ import History from './pages/History';
 import Referral from './pages/Referral';
 import Wallet from './pages/Wallet';
 import Profile from './pages/Profile';
+import SetPin from './pages/SetPin';
 
 // Admin panel (Phase 4)
 import AdminLayout from './components/admin/AdminLayout';
@@ -123,6 +124,7 @@ export default function App() {
           <Route path="/referral"    element={<Referral />} />
           <Route path="/wallet"      element={<Wallet />} />
           <Route path="/profile"     element={<Profile />} />
+          <Route path="/set-pin"     element={<SetPin />} />
         </Route>
 
         {/* Admin panel routes - staff only, guarded inside AdminLayout */}

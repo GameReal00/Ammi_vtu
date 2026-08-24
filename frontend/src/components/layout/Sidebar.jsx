@@ -19,6 +19,7 @@ const navItems = [
   { to: '/history',     emoji: '📋', label: 'History' },
   { to: '/referral',    emoji: '🎁', label: 'Refer & Earn' },
   { to: '/profile',     emoji: '👤', label: 'Profile' },
+  { to: '/set-pin',     emoji: '🔐', label: 'Set PIN' },
 ];
 
 export default function Sidebar() {
