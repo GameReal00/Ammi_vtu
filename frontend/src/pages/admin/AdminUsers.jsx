@@ -28,7 +28,6 @@ export default function AdminUsers() {
 
   useEffect(() => {
     loadUsers();
-    
   }, []);
 
   const handleSearch = (e) => {

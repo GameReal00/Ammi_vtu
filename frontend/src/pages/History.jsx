@@ -3,6 +3,7 @@
  */
 import { useState, useEffect } from 'react';
 import api from '../api/axios';
+import ReceiptModal from '../components/ReceiptModal';
 
 const SERVICE_ICONS = {
   airtime: '📞', data: '📶', electricity: '💡', tv: '📺', edu: '🎓',
@@ -30,6 +31,7 @@ export default function History() {
   const [loading, setLoading]           = useState(true);
   const [filter, setFilter]             = useState('all');
   const [summary, setSummary]           = useState(null);
+  const [receiptTx, setReceiptTx]         = useState(null);
 
   useEffect(() => {
     (async () => {
@@ -147,6 +149,7 @@ export default function History() {
                   transition: 'background 0.1s',
                 }}
                 onMouseEnter={e => e.currentTarget.style.background = 'var(--gray-50)'}
+                onClick={() => setReceiptTx(tx)}
                 onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                 >
                   {/* Icon */}
@@ -196,6 +199,7 @@ export default function History() {
       <style>{`
         @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
       `}</style>
+      <ReceiptModal tx={receiptTx} onClose={() => setReceiptTx(null)} />
     </div>
   );
 }

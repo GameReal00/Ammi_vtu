@@ -50,7 +50,6 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     if (!loading) loadDaily(days);
-    
   }, [days]);
 
   if (loading) {
@@ -136,4 +135,3 @@ export default function AdminDashboard() {
     </div>
   );
 }
-

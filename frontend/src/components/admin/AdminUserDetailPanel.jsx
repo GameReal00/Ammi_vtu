@@ -31,7 +31,6 @@ export default function AdminUserDetailPanel({ userId, onBack }) {
 
   useEffect(() => {
     loadUser();
-    
   }, [userId]);
 
   const handleToggleStatus = async () => {
