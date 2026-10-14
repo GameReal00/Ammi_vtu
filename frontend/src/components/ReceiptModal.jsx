@@ -83,6 +83,11 @@ export default function ReceiptModal({ tx, onClose }) {
             </div>
           )}
         </div>
+        {tx.request_id && (
+         <p style={{ margin: '6px 0 0', fontSize: 10, fontFamily: 'monospace', color: 'var(--gray-400, #9ca3af)'}}>
+           Req: {tx.request_id}
+         </p> 
+        )}
 
         {/* WhatsApp share */}
         <a href={`https://wa.me/?text=${shareText}`} target="_blank" rel="noreferrer"
