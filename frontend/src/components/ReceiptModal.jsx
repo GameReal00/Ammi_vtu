@@ -31,6 +31,7 @@ export default function ReceiptModal({ tx, onClose }) {
       `Status: ${tx.status.toUpperCase()}`,
       `Date: ${new Date(tx.created_at).toLocaleString('en-NG')}`,
       `Txn ID: ${tx.id}`,
+      tx.request_id ? `VTpass Request ID: ${tx.request_id}` : '',
       tx.vtpass_ref ? `Provider Ref: ${tx.vtpass_ref}` : '',
       '------------------------', 'Powered by AMMI VTU',
     ].filter(Boolean).join('\n')
@@ -83,11 +84,61 @@ export default function ReceiptModal({ tx, onClose }) {
             </div>
           )}
         </div>
-        {tx.request_id && (
-         <p style={{ margin: '6px 0 0', fontSize: 10, fontFamily: 'monospace', color: 'var(--gray-400, #9ca3af)'}}>
-           Req: {tx.request_id}
-         </p> 
-        )}
+        
+{tx.request_id && (
+  <div style={{
+    marginTop: 10,
+    background: '#eff6ff',
+    border: '1px solid #bfdbfe',
+    borderRadius: 10,
+    padding: '10px 12px'
+  }}>
+    <p style={{
+      margin: 0,
+      fontSize: 10,
+      fontWeight: 700,
+      color: '#1d4ed8',
+      letterSpacing: 0.5
+    }}>
+      VTPASS REQUEST ID
+    </p>
+
+    <div style={{
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      gap: 8,
+      marginTop: 6
+    }}>
+      <p style={{
+        margin: 0,
+        fontSize: 11,
+        fontFamily: 'monospace',
+        color: '#1e3a8a',
+        overflowWrap: 'anywhere'
+      }}>
+        {tx.request_id}
+      </p>
+
+      <button
+        onClick={() => copy(tx.request_id)}
+        style={{
+          flexShrink: 0,
+          border: '1px solid #bfdbfe',
+          background: '#fff',
+          borderRadius: 8,
+          padding: '5px 10px',
+          fontSize: 11,
+          fontWeight: 700,
+          cursor: 'pointer'
+        }}
+      >
+        Copy
+      </button>
+    </div>
+  </div>
+)}
+
 
         {/* WhatsApp share */}
         <a href={`https://wa.me/?text=${shareText}`} target="_blank" rel="noreferrer"
